@@ -1,0 +1,31 @@
+
+/**************
+---------------
+GENERAL
+---------------
+**************/
+#content{
+	padding: 1em;
+}
+
+
+/**************
+---------------
+FORMS
+---------------
+**************/
+.form-group{
+	padding: .5em;
+	border-radius: 5px;
+}
+
+.form-error
+{
+	background-color:rgba(242,222,222,.7);
+}
+
+.message
+{
+	padding: .5em;
+	border-radius: 5px;
+}
