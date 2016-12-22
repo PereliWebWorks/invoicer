@@ -5,6 +5,7 @@
 <?php
 	$form_fields = array(
 		array("label"=>"Name", "name"=>"name", "type"=>"text", "required"=>true),
+		array("label"=>"Company", "name"=>"company", "type"=>"text"),
 		array("label"=>"Email", "name"=>"email", "type"=>"email", "required"=>true),
 		array("label"=>"Rate", "name"=>"default_rate", "type"=>"HOURLY_RATE", "required"=>true),
 		array("label"=>"Phone", "name"=>"phone", "type"=>"telephone"),

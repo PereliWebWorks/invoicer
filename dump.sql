@@ -26,6 +26,7 @@ CREATE TABLE `clients` (
   `id` int NOT NULL AUTO_INCREMENT,
   `user_id` int NOT NULL,
   `name` varchar(100) NOT NULL,
+  `company` varchar(500) DEFAULT NULL,
   `email` varchar(200) NOT NULL,
   `default_rate` int(7) NOT NULL,
   `phone` int(10) DEFAULT NULL,
@@ -33,6 +34,7 @@ CREATE TABLE `clients` (
   `city` varchar(50) DEFAULT NULL,
   `state` varchar(2) DEFAULT NULL,
   `zip` int(5) DEFAULT NULL,
+  `active` boolean DEFAULT 1,
   PRIMARY KEY (`id`),
   KEY `user_id` (`user_id`),
   CONSTRAINT `clients_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`)
@@ -58,7 +60,7 @@ DROP TABLE IF EXISTS `invoices`;
 CREATE TABLE `invoices` (
   `id` int NOT NULL AUTO_INCREMENT,
   `client_id` int NOT NULL,
-  `status` tinyint NOT NULL DEFAULT '0',
+  `status` tinyint NOT NULL DEFAULT '0', -- 0 is 'not sent', 1 is 'pending payment', 2 'payment received'
   PRIMARY KEY (`id`),
   KEY `client_id` (`client_id`),
   CONSTRAINT `invoices_ibfk_1` FOREIGN KEY (`client_id`) REFERENCES `clients` (`id`)

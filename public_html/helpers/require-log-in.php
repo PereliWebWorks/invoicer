@@ -2,7 +2,12 @@
 <?php
 	if (!loggedIn())
 	{
-		header("Location: http://" . HOST . "/sign-up.php");
-		die();
+		if (!currentUserIsRemembered())
+		{
+			header("Location: http://" . HOST . "/sign-up.php");
+			die();
+		}
+		logIn($_COOKIE["user_id"]);
+		setFlash("success", "Welcome back!");
 	}
 ?>

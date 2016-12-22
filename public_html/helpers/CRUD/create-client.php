@@ -75,15 +75,13 @@
 		$i++;
 	}
 	$query .= $query_part_1 . $query_part_2;
-	echo ($query . "<br/>");
 	$stmt = $db->prepare($query);
 	//Iterate through the client array again to bind the params
 	$stmt->execute();
 	$last_id = $db->lastInsertId();
-	$stmt = $db->prepare("SELECT * FROM clients WHERE id=$last_id");
-	$stmt->execute();
-	print_r($stmt->fetch(PDO::FETCH_ASSOC));
-	//echo "success_" . $last_id;
+	$_POST["new-invoice"]["client_id"] = $last_id;
+	require("create-invoice.php");
+	echo "success_" . $last_id;
 ?>
 
 
