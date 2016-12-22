@@ -2,7 +2,8 @@
 <?php
 	if (loggedIn())
 	{
-		headers("Location: http://" . HOST);
+		header("Location: http://" . HOST);
+		die()
 	}
 ?>
 <?php require_once("helpers/global-html-head.php"); ?>

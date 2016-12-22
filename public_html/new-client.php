@@ -6,7 +6,7 @@
 	$form_fields = array(
 		array("label"=>"Name", "name"=>"name", "type"=>"text", "required"=>true),
 		array("label"=>"Email", "name"=>"email", "type"=>"email", "required"=>true),
-		array("label"=>"Rate", "name"=>"default_rate", "type"=>"MONEY", "required"=>true),
+		array("label"=>"Rate", "name"=>"default_rate", "type"=>"HOURLY_RATE", "required"=>true),
 		array("label"=>"Phone", "name"=>"phone", "type"=>"telephone"),
 		array("label"=>"Address", "name"=>"address", "type"=>"text"),
 		array("label"=>"City", "name"=>"city", "type"=>"text"),
@@ -36,9 +36,11 @@
 				data: json,
 			}).done(function(data){
 				data = $.trim(data);
-				if (data === "success")
+				if (data.split("_")[0] === "success")
 				{
-					$("#response").html("Client added.")
+					$("#response").html("Client added.");
+					var id = data.split("_")[1];
+					window.location.replace("client.php?c=" + id);
 				}
 				else
 				{

@@ -71,18 +71,19 @@
 	{
 		$appender = $i === (sizeof($new_client) - 1) ? ") " : ", ";
 		$query_part_1 .= $field_name . $appender;
-		$query_part_2 .= ":" . $field_name . $appender;
+		$query_part_2 .= "'$value'$appender";
 		$i++;
 	}
 	$query .= $query_part_1 . $query_part_2;
+	echo ($query . "<br/>");
 	$stmt = $db->prepare($query);
 	//Iterate through the client array again to bind the params
-	foreach ($new_client as $field_name=>$value)
-	{
-		$stmt->bindParam(":{$field_name}", $value);
-	}
 	$stmt->execute();
-	echo "success";
+	$last_id = $db->lastInsertId();
+	$stmt = $db->prepare("SELECT * FROM clients WHERE id=$last_id");
+	$stmt->execute();
+	print_r($stmt->fetch(PDO::FETCH_ASSOC));
+	//echo "success_" . $last_id;
 ?>
 
 

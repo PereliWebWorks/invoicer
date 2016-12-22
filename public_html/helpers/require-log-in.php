@@ -3,5 +3,6 @@
 	if (!loggedIn())
 	{
 		header("Location: http://" . HOST . "/sign-up.php");
+		die();
 	}
 ?>

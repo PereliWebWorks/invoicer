@@ -4,6 +4,7 @@
 	if (!isset($_GET["i"]) || !isset($_GET["c"]))
 	{
 		header("Location: http://" . HOST . "/sign-up.php");
+		die();
 	}
 	$id = $_GET["i"];
 	$code = $_GET["c"];
@@ -15,17 +16,20 @@
 	if ($stmt->rowCount() !== 1) //If bad id
 	{
 		header("Location: http://" . HOST . "/sign-up.php");
+		die();
 	}
 	//If account is already activated
 	$result = $stmt->fetch(PDO::FETCH_ASSOC);
 	if ($result["activated"] === "1")
 	{
 		header("Location: http://" . HOST . "/log-in.php");
+		die();
 	}
 	$code_digest = $result["activation_code_digest"];
 	if (!password_verify($code, $code_digest))
 	{
 		header("Location: http://" . HOST . "/sign-up.php");
+		die();
 	}
 	//Else, we're all good! Set the account to activated.
 	$query = "UPDATE users SET activated=1 WHERE id=:id";
@@ -35,4 +39,5 @@
 	logIn($id);
 	setFlash("success", "Your account has been activated.");
 	header("Location: http://" . HOST . "/index.php");
+	die();
 ?>

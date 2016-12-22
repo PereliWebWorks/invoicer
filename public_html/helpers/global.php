@@ -1,11 +1,13 @@
 <?php
+	session_start();
 	define("HOST", "invoicer.drewpereli.com");
 
 	error_reporting(E_ALL|E_STRICT);
 	ini_set('display_errors', 1);
 	ini_set('sendmail_from', "noreply@" . HOST);
 	
-	session_start();
+	
+	require_once("connectToDB.php");
 
 	function logIn($id)
 	{
@@ -24,6 +26,29 @@
 		return false;
 	}
 
+	//Returns an array with all the info about the current user
+	function currentUser()
+	{
+		if (!loggedIn()){return false;}
+		$db = $GLOBALS['db'];
+		$q = "SELECT * FROM users WHERE id=:id";
+		$st = $db->prepare($q);
+		$st->bindParam(":id", $_SESSION["user_id"]);
+		$st->execute();
+		return $st->fetch(PDO::FETCH_ASSOC);
+	}
+	function getClient($id)
+	{
+		if (!loggedIn()){return false;}
+		$db = $GLOBALS['db'];
+		$q = "SELECT * FROM clients WHERE id=:id";
+		$st = $db->prepare($q);
+		$st->bindParam(":id", $id);
+		$st->execute();
+		if ($st->rowCount() === 0){return false;}
+		return ($st->fetch(PDO::FETCH_ASSOC));
+	}
+
 	function setFlash($type, $message)
 	{
 		$_SESSION["flash"][$type] = $message;
@@ -31,7 +56,7 @@
 	function flash($type)
 	{
 		echo $_SESSION["flash"][$type];
-		$_SESSION["flash"][$type] = null;
+		unset($_SESSION["flash"][$type]);
 	}
 
 	function getIntFromPhone($phone_number)
@@ -54,13 +79,14 @@
 			$required_class = isset($field["required"]) && $field["required"] != false ? "required" : "";
 			$label = $required_class === "required" ? $field["label"] . " *" : $field["label"];
 			$element;
-			if ($type === "MONEY")
+			if ($type === "HOURLY_RATE")
 			{
 				$element = "<div class='form-group'>
 								<label for='$name'>$label</label>
 								<div class='input-group'>
 									<div class='input-group-addon'>$</div>
-									<input type='number' name='$name' id='$id' class='$required_class'>
+									<input type='number' name='$name' id='$id' class='form-control $required_class'>
+									<span class='input-group-addon'>per hour</span>
 								</div>
 							</div>";
 			}
@@ -138,4 +164,3 @@
 		echo "</form>";
 	}
 ?>
-<?php require_once("connectToDB.php"); ?>
