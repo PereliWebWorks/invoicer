@@ -71,7 +71,7 @@
 	{
 		$appender = $i === (sizeof($new_client) - 1) ? ") " : ", ";
 		$query_part_1 .= $field_name . $appender;
-		$query_part_2 .= ":" . $field_name . $appender;
+		$query_part_2 .= "':$field_name'$appender";
 		$i++;
 	}
 	$query .= $query_part_1 . $query_part_2;
