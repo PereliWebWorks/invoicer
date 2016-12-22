@@ -6,6 +6,8 @@ GENERAL
 **************/
 #content{
 	padding: 1em;
+	padding-left: 2.5em;
+	padding-right: 2.5em;
 }
 
 
@@ -28,4 +30,15 @@ FORMS
 {
 	padding: .5em;
 	border-radius: 5px;
+}
+
+
+/**************
+---------------
+INVOICES
+---------------
+**************/
+.invoice{
+  padding: 1em;
+  border: 1px solid #ddd !important;
 }

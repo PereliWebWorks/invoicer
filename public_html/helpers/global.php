@@ -1,18 +1,26 @@
 <?php
+	session_start();
 	define("HOST", "invoicer.drewpereli.com");
 
 	error_reporting(E_ALL|E_STRICT);
 	ini_set('display_errors', 1);
 	ini_set('sendmail_from', "noreply@" . HOST);
 	
-	session_start();
+	
+	require_once("connectToDB.php");
 
+	function logInViaCookie($id)
+	{
+		$_SESSION["user_id"] = $id;
+		rememberUser();
+	}
 	function logIn($id)
 	{
 		$_SESSION["user_id"] = $id;
 	}
 	function logOut()
 	{
+		forgetUser();
 		$_SESSION["user_id"] = null;
 	}
 	function loggedIn()
@@ -23,6 +31,78 @@
 		}
 		return false;
 	}
+	function rememberUser()
+	{
+		if (!loggedIn()){return false;}
+		$remember_token = md5(rand());
+		$remember_digest = password_hash($remember_token, PASSWORD_DEFAULT);
+		//Set cookie
+		setcookie("remember_token", $remember_token, time() + (86400 * 30), "/");
+		setcookie("user_id", $_SESSION["user_id"], time() + (86400 * 30), "/");
+		//Insert remember token into db
+		$db = $GLOBALS["db"];
+		$query = "UPDATE users SET remember_digest=:remember_digest WHERE id=:id";
+		$st = $db->prepare($query);
+		$st->bindParam(":remember_digest", $remember_digest);
+		$st->bindParam(":id", $_SESSION["user_id"]);
+		$st->execute();
+	}
+	function forgetUser()
+	{
+		if (!loggedIn()){return false;}
+		setcookie("remember_token", "", time() - (86400), "/");
+		setcookie("user_id", "", time() - (86400), "/");
+		$query = "UPDATE users SET remember_digest=NULL WHERE id=:id";
+		$db = $GLOBALS["db"];
+		$st = $db->prepare($query);
+		$st->bindParam(":id", $_SESSION["user_id"]);
+		$st->execute();
+	}
+	//When a user goes to the site, this will see if they are remembered. If so it will log them in.
+	function currentUserIsRemembered()
+	{
+		if (empty($_COOKIE["user_id"]) || empty($_COOKIE["remember_token"]))
+		{
+			return false;
+		}
+		$id = $_COOKIE["user_id"];
+		$token = $_COOKIE["remember_token"];
+		$q = "SELECT remember_digest FROM users WHERE id=:id";
+		$db = $GLOBALS["db"];
+		$st = $db->prepare($q);
+		$st->bindParam(":id", $id);
+		$st->execute();
+		$digest = $st->fetch(PDO::FETCH_ASSOC)["remember_digest"];
+		//If the token is invalid
+		if (!password_verify($token, $digest))
+		{
+			return false;
+		}
+		return true;
+	}
+
+	//Returns an array with all the info about the current user
+	function currentUser()
+	{
+		if (!loggedIn()){return false;}
+		$db = $GLOBALS['db'];
+		$q = "SELECT * FROM users WHERE id=:id";
+		$st = $db->prepare($q);
+		$st->bindParam(":id", $_SESSION["user_id"]);
+		$st->execute();
+		return $st->fetch(PDO::FETCH_ASSOC);
+	}
+	function getClient($id)
+	{
+		if (!loggedIn()){return false;}
+		$db = $GLOBALS['db'];
+		$q = "SELECT * FROM clients WHERE id=:id";
+		$st = $db->prepare($q);
+		$st->bindParam(":id", $id);
+		$st->execute();
+		if ($st->rowCount() === 0){return false;}
+		return ($st->fetch(PDO::FETCH_ASSOC));
+	}
 
 	function setFlash($type, $message)
 	{
@@ -31,7 +111,7 @@
 	function flash($type)
 	{
 		echo $_SESSION["flash"][$type];
-		$_SESSION["flash"][$type] = null;
+		unset($_SESSION["flash"][$type]);
 	}
 
 	function getIntFromPhone($phone_number)
@@ -54,20 +134,29 @@
 			$required_class = isset($field["required"]) && $field["required"] != false ? "required" : "";
 			$label = $required_class === "required" ? $field["label"] . " *" : $field["label"];
 			$element;
-			if ($type === "MONEY")
+			if ($type === "checkbox")
+			{
+				$checked = $field["checked"] ? "true" : "false";
+				$element = "<div class='form-group'>
+								<label for='$id'>$label</label>
+								<input type='checkbox' name='$name' id='$id' checked='$checked'>
+							</div>";
+			}
+			elseif ($type === "HOURLY_RATE")
 			{
 				$element = "<div class='form-group'>
-								<label for='$name'>$label</label>
+								<label for='$id'>$label</label>
 								<div class='input-group'>
 									<div class='input-group-addon'>$</div>
-									<input type='number' name='$name' id='$id' class='$required_class'>
+									<input type='number' name='$name' id='$id' class='form-control $required_class'>
+									<span class='input-group-addon'>per hour</span>
 								</div>
 							</div>";
 			}
 			elseif ($type === "STATE_DROPDOWN")
 			{
 				$element = "<div class='form-group'>"
-							. "<label for='$name'>$label</label><br/>";
+							. "<label for='$id'>$label</label><br/>";
 				$element .= "<select name='{$name}' id='{$id}' class='$required_class'>
 								<option value=''></option>
 								<option value='AL'>Alabama</option>
@@ -127,7 +216,7 @@
 			else
 			{
 				$element = "<div class='form-group'>"
-							. "<label for='$name'>$label</label>"
+							. "<label for='$id'>$label</label>"
 							. "<input type='$type' name='$name' id='$id' class='form-control {$required_class}'/>"
 						. "</div>";
 			}
@@ -138,4 +227,3 @@
 		echo "</form>";
 	}
 ?>
-<?php require_once("connectToDB.php"); ?>

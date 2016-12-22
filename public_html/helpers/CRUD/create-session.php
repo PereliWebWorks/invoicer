@@ -27,6 +27,15 @@
 	}
 	//If we're here, we're good!
 	logIn($user["id"]);
+	//If 'remember me' is set
+	if (!empty($_POST["log-in"]["remember"]))
+	{
+		rememberUser();
+	}
+	else
+	{
+		forgetUser();
+	}
 	echo "SUCCESS";
 
 ?>

@@ -2,7 +2,8 @@
 <?php
 	if (loggedIn())
 	{
-		headers("Location: http://" . HOST);
+		header("Location: http://" . HOST);
+		die();
 	}
 ?>
 <?php require_once("helpers/global-html-head.php"); ?>
@@ -10,7 +11,8 @@
 <?php
 	$form_fields = array(
 		array("label"=>"Email", "name"=>"email", "type"=>"text", "required"=>true),
-		array("label"=>"Password", "name"=>"password", "type"=>"password", "required"=>true)
+		array("label"=>"Password", "name"=>"password", "type"=>"password", "required"=>true),
+		array("label"=>"Remember Me", "name"=>"remember", "type"=>"checkbox", "checked"=>true)
 		);
 	generateForm($form_fields, "log-in");
 ?>

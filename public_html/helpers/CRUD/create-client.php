@@ -72,31 +72,16 @@
 	{
 		$appender = $i === (sizeof($new_client) - 1) ? ") " : ", ";
 		$query_part_1 .= $field_name . $appender;
-		if (in_array($field_name, $ints))//If the field is an int, don't add the quotes
-		{
-			$query_part_2 .= ":{$field_name}$appender";
-		}
-		else
-		{
-			$query_part_2 .= "':{$field_name}'$appender";
-		}
+		$query_part_2 .= "'$value'$appender";
 		$i++;
 	}
 	$query .= $query_part_1 . $query_part_2;
 	$stmt = $db->prepare($query);
-	echo "$query<br/>";
-	//Iterate through the client array again to bind the params
-	foreach ($new_client as $field_name=>$value)
-	{
-		echo "stmt->bindParam(':{$field_name}', $value);<br/>";
-		if ($field_name === "default_rate"){$value = intval($value);}
-		$stmt->bindParam(":{$field_name}", $value);
-	}
 	$stmt->execute();
 	$last_id = $db->lastInsertId();
-	$stmt = $db->prepare("SELECT * FROM clients WHERE id=$last_id");
-	$stmt->execute();
-	print_r($stmt->fetch(PDO::FETCH_ASSOC));
+	$_POST["new-invoice"]["client_id"] = $last_id;
+	require("create-invoice.php");
+	echo "success_" . $last_id;
 ?>
 
 
