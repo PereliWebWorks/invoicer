@@ -1,18 +1,23 @@
 <?php require_once("../global.php"); ?>
 <?php
-	if (!isset($_POST["new-user"]))
+	if (empty($_POST["new-user"]))
 	{
 		die();
 	}
 	$_POST = $_POST["new-user"];
 	$_POST["new-user"] = null;
 
-	if (!isset($_POST["username"]))
+	if (empty($_POST["username"]))
 	{
-		echo "Invalid username.";
+		echo "Name must be present.";
 		die();
 	}
-	if (!isset($_POST["email"]))
+	if (empty($_POST["email"]))
+	{
+		echo "Email must be present.";
+		die();
+	}
+	if (!filter_var($_POST["email"], FILTER_VALIDATE_EMAIL))
 	{
 		echo "Invalid email.";
 		die();
@@ -26,7 +31,7 @@
 		echo "There is already an account set up with that email address.";
 		die();
 	}
-	if (!isset($_POST["password"]) || strlen($_POST["password"]) < 6 )
+	if (empty($_POST["password"]) || strlen($_POST["password"]) < 6 )
 	{
 		echo ($_POST["password"]);
 		echo "Invalid password.";
@@ -34,7 +39,7 @@
 	}
 	$pwd_hash = password_hash($_POST["password"], PASSWORD_DEFAULT);
 	$_POST["password"] = null; 
-	if (!isset($_POST["password-confirmation"]))
+	if (empty($_POST["password-confirmation"]))
 	{
 		echo "Invalid password confirmation.";
 		die();

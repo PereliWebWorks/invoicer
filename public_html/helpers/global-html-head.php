@@ -19,15 +19,15 @@
 		function validateRequiredFields(formId)
 		{
 			var valid = true;
-			$("#" + formId + " input.required").each(function(index, element){
+			$("#" + formId + " .required").each(function(index, element){
 				if (!$(element).val()) //If a required input is empty
 				{
 					valid = false;
-					$(element).parent().addClass("form-error");
+					$(element).closest(".form-group").addClass("form-error");
 				}
 				else
 				{
-					$(element).parent().removeClass("form-error");
+					$(element).closest(".form-group").removeClass("form-error");
 				}
 			});
 			return valid;
@@ -75,6 +75,7 @@
 	</script>
 
 	<div class="container-fluid" id="content">
+		<?php require_once("helpers/flasher.php"); ?>
 
 
 

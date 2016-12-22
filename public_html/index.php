@@ -9,6 +9,5 @@
 	$stmt->execute();
 	$user = $stmt->fetch(PDO::FETCH_ASSOC);
 ?>
-	<div><?php flash("success") ?>
 	<h2><?= $user["name"] ?></h2>
 <?php require_once("helpers/global-html-foot.php"); ?>

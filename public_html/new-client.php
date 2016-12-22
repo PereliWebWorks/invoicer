@@ -1,11 +1,12 @@
 <?php require_once("helpers/global.php"); ?>
+<?php require_once("helpers/require-log-in.php"); ?>
 <?php require_once("helpers/global-html-head.php"); ?>
 <h1>New Client</h1>
 <?php
 	$form_fields = array(
 		array("label"=>"Name", "name"=>"name", "type"=>"text", "required"=>true),
 		array("label"=>"Email", "name"=>"email", "type"=>"email", "required"=>true),
-		array("label"=>"Rate", "name"=>"rate", "type"=>"MONEY", "required"=>true),
+		array("label"=>"Rate", "name"=>"default_rate", "type"=>"MONEY", "required"=>true),
 		array("label"=>"Phone", "name"=>"phone", "type"=>"telephone"),
 		array("label"=>"Address", "name"=>"address", "type"=>"text"),
 		array("label"=>"City", "name"=>"city", "type"=>"text"),

@@ -1,13 +1,12 @@
 <?php
 	define("HOST", "invoicer.drewpereli.com");
-?>
-<?php
+
 	error_reporting(E_ALL|E_STRICT);
 	ini_set('display_errors', 1);
 	ini_set('sendmail_from', "noreply@" . HOST);
-?>
-<?php session_start(); ?>
-<?php
+	
+	session_start();
+
 	function logIn($id)
 	{
 		$_SESSION["user_id"] = $id;
@@ -35,6 +34,13 @@
 		$_SESSION["flash"][$type] = null;
 	}
 
+	function getIntFromPhone($phone_number)
+	{
+		$p = preg_replace('/[^0-9]/','',$phone_number);
+		$p = intval($p);
+		return $p;
+	}
+
 	function generateForm($fields, $form_name)
 	{
 		echo "<form id='{$form_name}_form'>";
@@ -54,7 +60,7 @@
 								<label for='$name'>$label</label>
 								<div class='input-group'>
 									<div class='input-group-addon'>$</div>
-									<input type='number' name='$name' id='$id'>
+									<input type='number' name='$name' id='$id' class='$required_class'>
 								</div>
 							</div>";
 			}
@@ -62,8 +68,8 @@
 			{
 				$element = "<div class='form-group'>"
 							. "<label for='$name'>$label</label><br/>";
-				$element .= "<select name='{$name}' id='{$id}'>
-								<option value='null'></option>
+				$element .= "<select name='{$name}' id='{$id}' class='$required_class'>
+								<option value=''></option>
 								<option value='AL'>Alabama</option>
 								<option value='AK'>Alaska</option>
 								<option value='AZ'>Arizona</option>

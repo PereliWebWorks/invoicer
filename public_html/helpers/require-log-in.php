@@ -1,4 +1,4 @@
-<?php require_once("helpers/global.php"); ?>
+<?php require_once("global.php"); ?>
 <?php
 	if (!loggedIn())
 	{

@@ -1,6 +1,6 @@
 <?php require_once("../global.php"); ?>
 <?php
-	if (!isset($_POST["log-in"]["email"]) || !isset($_POST["log-in"]["password"]))
+	if (empty($_POST["log-in"]["email"]) || empty($_POST["log-in"]["password"]))
 	{
 		echo "Password and email must be set.";
 		die();

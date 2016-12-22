@@ -23,11 +23,11 @@ DROP TABLE IF EXISTS `clients`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `clients` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
-  `user_id` int(11) NOT NULL,
+  `id` int NOT NULL AUTO_INCREMENT,
+  `user_id` int NOT NULL,
   `name` varchar(100) NOT NULL,
-  `default_rate` int(7) NOT NULL,
   `email` varchar(200) NOT NULL,
+  `default_rate` int(7) NOT NULL,
   `phone` int(10) DEFAULT NULL,
   `address` varchar(300) DEFAULT NULL,
   `city` varchar(50) DEFAULT NULL,
@@ -56,9 +56,9 @@ DROP TABLE IF EXISTS `invoices`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `invoices` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
-  `client_id` int(11) NOT NULL,
-  `status` int(1) NOT NULL DEFAULT '0',
+  `id` int NOT NULL AUTO_INCREMENT,
+  `client_id` int NOT NULL,
+  `status` tinyint NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`),
   KEY `client_id` (`client_id`),
   CONSTRAINT `invoices_ibfk_1` FOREIGN KEY (`client_id`) REFERENCES `clients` (`id`)
@@ -82,8 +82,8 @@ DROP TABLE IF EXISTS `items`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `items` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
-  `invoice_id` int(11) NOT NULL,
+  `id` int NOT NULL AUTO_INCREMENT,
+  `invoice_id` int NOT NULL,
   `description` varchar(1000) NOT NULL,
   `duration` int(11) NOT NULL,
   PRIMARY KEY (`id`),
@@ -109,7 +109,7 @@ DROP TABLE IF EXISTS `users`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `users` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `id` int NOT NULL AUTO_INCREMENT,
   `name` varchar(100) NOT NULL,
   `email` varchar(200) NOT NULL,
   `phone` int(10) DEFAULT NULL,
