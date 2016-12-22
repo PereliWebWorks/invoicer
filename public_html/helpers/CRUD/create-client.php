@@ -22,7 +22,7 @@
 	//Make sure only valid fields are present, and set empty non-required fields to null
 	$stmt = $db->prepare("DESCRIBE clients");
 	$stmt->execute();
-	$table_fields = $stmt->fetchAll(PDO::FETCH_COLUMN);
+	$table_fields = $stmt->fetchAll(PDO::FETCH_COLUMN, 0);
 	foreach ($new_client as $field_name => $value)
 	{
 		if (!in_array($field_name, $table_fields)) //If there is a field present that is not also a database field
@@ -63,6 +63,7 @@
 	//Set 'user_id' reference to current logged-in user.
 	$new_client["user_id"] = $_SESSION["user_id"];
 	//Generate the query
+	$ints = ["default_rate", "phone", "zip", "user_id"];
 	$query = "INSERT INTO clients ";
 	$query_part_1 = "(";
 	$query_part_2 = "VALUES (";
@@ -71,18 +72,31 @@
 	{
 		$appender = $i === (sizeof($new_client) - 1) ? ") " : ", ";
 		$query_part_1 .= $field_name . $appender;
-		$query_part_2 .= "':$field_name'$appender";
+		if (in_array($field_name, $ints))//If the field is an int, don't add the quotes
+		{
+			$query_part_2 .= ":{$field_name}$appender";
+		}
+		else
+		{
+			$query_part_2 .= "':{$field_name}'$appender";
+		}
 		$i++;
 	}
 	$query .= $query_part_1 . $query_part_2;
 	$stmt = $db->prepare($query);
+	echo "$query<br/>";
 	//Iterate through the client array again to bind the params
 	foreach ($new_client as $field_name=>$value)
 	{
+		echo "stmt->bindParam(':{$field_name}', $value);<br/>";
+		if ($field_name === "default_rate"){$value = intval($value);}
 		$stmt->bindParam(":{$field_name}", $value);
 	}
 	$stmt->execute();
-	echo "success";
+	$last_id = $db->lastInsertId();
+	$stmt = $db->prepare("SELECT * FROM clients WHERE id=$last_id");
+	$stmt->execute();
+	print_r($stmt->fetch(PDO::FETCH_ASSOC));
 ?>
 
 
