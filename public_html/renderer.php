@@ -10,10 +10,10 @@
 	        }
 	    }
 	    public function __set($name, $value) {
-        	$this->vars[$name] = $value;
+        	$this->data[$name] = $value;
    		}
     	public function __get($name) {
-        	return $this->vars[$name];
+        	return $this->data[$name];
     	}
 	}
 	$renderer = new Renderer();
