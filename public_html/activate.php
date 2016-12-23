@@ -32,7 +32,7 @@
 		die();
 	}
 	//Else, we're all good! Set the account to activated.
-	$query = "UPDATE users SET activated=1 WHERE id=:id";
+	$query = "UPDATE users SET activated=1, activation_code_digest=NULL, WHERE id=:id";
 	$stmt = $db->prepare($query);
 	$stmt->bindParam(":id", $id);
 	$stmt->execute();

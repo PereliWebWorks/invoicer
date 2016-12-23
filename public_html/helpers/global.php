@@ -103,6 +103,55 @@
 		if ($st->rowCount() === 0){return false;}
 		return ($st->fetch(PDO::FETCH_ASSOC));
 	}
+	function getCurrentInvoice($client_id)
+	{
+		if (!loggedIn()){return false;}
+		$db = $GLOBALS['db'];
+		$q = "SELECT * FROM invoices WHERE id=:id";
+		$st = $db->prepare($q);
+		$st->bindParam(":id", $client_id);
+		$st->execute();
+		if ($st->rowCount() === 0){return false;}
+		return ($st->fetch(PDO::FETCH_ASSOC));
+	}
+	function getInvoiceItems($invoice)
+	{
+		$invoice_id = $invoice["id"];
+		$db = $GLOBALS["db"];
+		$q = "SELECT * FROM items WHERE invoice_id=:id";
+		$st = $db->prepare($q);
+		$st->bindParam(":id", $invoice_id);
+		$st->execute();
+		return $st->fetchAll(PDO::FETCH_ASSOC);
+	}
+	//Returns total duration in minutes
+	function getTotalDuration($invoice)
+	{
+		$items = getInvoiceItems($invoice);
+		$total = 0;
+		foreach ($items as $item)
+		{
+			$total += intval($item["duration"]);
+		}
+		return $total;
+	}
+	//Returns total cost in cents
+	function getTotalCost($invoice)
+	{
+		$total_duration = getTotalDuration($invoice) / 60;
+		$rate = getClient($invoice["client_id"])["default_rate"];
+		return $rate * $total_duration;
+	}
+	function getInvoiceSlug($invoice)
+	{
+		$invoice_id = $invoice["id"];
+		$client_id = $invoice["client_id"];
+		$user_id = getClient($client_id)["user_id"];
+		$slug = "u{$user_id}c{$client_id}";
+		$slug .= $invoice["status"] === "2" ? "r" : "i";
+		$slug .= $invoice_id;
+		return $slug;
+	}
 
 	function setFlash($type, $message)
 	{

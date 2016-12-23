@@ -6,7 +6,7 @@
 				array("label"=>"Name", "name"=>"username", "type"=>"text", "required"=>true),
 				array("label"=>"Email", "name"=>"email", "type"=>"email", "required"=>true),
 				array("label"=>"Password", "name"=>"password", "type"=>"password", "required"=>true),
-				array("label"=>"Confirm Password", "name"=>"password-confirmation", "type"=>"password", "required"=>true)
+				array("label"=>"Confirm Password", "name"=>"password-confirmation", "type"=>"password", "required"=>true),
 			);
 		generateForm($form_fields, "new-user");
 	?>
@@ -60,6 +60,12 @@
 					.addClass("bg-danger text-danger")
 					.html(message);
 			}
+		});
+
+		$("body").keydown(function(event){
+		    if(event.keyCode == 13){
+		        $("#new-user_submit_btn").click();
+		    }
 		});
 	</script>
 <?require_once("helpers/global-html-foot.php"); ?>

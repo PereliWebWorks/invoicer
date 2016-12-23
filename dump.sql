@@ -1,8 +1,8 @@
--- MySQL dump 10.13  Distrib 5.7.16, for osx10.11 (x86_64)
+-- MySQL dump 10.13  Distrib 5.7.16, for Linux (x86_64)
 --
 -- Host: localhost    Database: invoicer
 -- ------------------------------------------------------
--- Server version	5.7.16
+-- Server version	5.7.16-0ubuntu0.16.04.1
 
 /*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
 /*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
@@ -23,8 +23,8 @@ DROP TABLE IF EXISTS `clients`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `clients` (
-  `id` int NOT NULL AUTO_INCREMENT,
-  `user_id` int NOT NULL,
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `user_id` int(11) NOT NULL,
   `name` varchar(100) NOT NULL,
   `company` varchar(500) DEFAULT NULL,
   `email` varchar(200) NOT NULL,
@@ -34,7 +34,7 @@ CREATE TABLE `clients` (
   `city` varchar(50) DEFAULT NULL,
   `state` varchar(2) DEFAULT NULL,
   `zip` int(5) DEFAULT NULL,
-  `active` boolean DEFAULT 1,
+  `active` tinyint(1) DEFAULT '1',
   PRIMARY KEY (`id`),
   KEY `user_id` (`user_id`),
   CONSTRAINT `clients_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`)
@@ -58,9 +58,9 @@ DROP TABLE IF EXISTS `invoices`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `invoices` (
-  `id` int NOT NULL AUTO_INCREMENT,
-  `client_id` int NOT NULL,
-  `status` tinyint NOT NULL DEFAULT '0', -- 0 is 'not sent', 1 is 'pending payment', 2 'payment received'
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `client_id` int(11) NOT NULL,
+  `status` tinyint(4) NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`),
   KEY `client_id` (`client_id`),
   CONSTRAINT `invoices_ibfk_1` FOREIGN KEY (`client_id`) REFERENCES `clients` (`id`)
@@ -84,8 +84,8 @@ DROP TABLE IF EXISTS `items`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `items` (
-  `id` int NOT NULL AUTO_INCREMENT,
-  `invoice_id` int NOT NULL,
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `invoice_id` int(11) NOT NULL,
   `description` varchar(1000) NOT NULL,
   `duration` int(11) NOT NULL,
   PRIMARY KEY (`id`),
@@ -111,7 +111,7 @@ DROP TABLE IF EXISTS `users`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `users` (
-  `id` int NOT NULL AUTO_INCREMENT,
+  `id` int(11) NOT NULL AUTO_INCREMENT,
   `name` varchar(100) NOT NULL,
   `email` varchar(200) NOT NULL,
   `phone` int(10) DEFAULT NULL,
@@ -119,13 +119,13 @@ CREATE TABLE `users` (
   `city` varchar(50) DEFAULT NULL,
   `state` varchar(2) DEFAULT NULL,
   `zip` int(5) DEFAULT NULL,
-  `default_rate` int DEFAULT NULL,
+  `default_rate` int(11) DEFAULT NULL,
   `password_digest` varchar(255) NOT NULL,
   `activated` tinyint(1) NOT NULL DEFAULT '0',
   `activation_code_digest` varchar(255) NOT NULL,
   `remember_digest` varchar(255) DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -134,6 +134,7 @@ CREATE TABLE `users` (
 
 LOCK TABLES `users` WRITE;
 /*!40000 ALTER TABLE `users` DISABLE KEYS */;
+INSERT INTO `users` VALUES (4,'Drew Pereli','drewpereli@gmail.com',NULL,NULL,NULL,NULL,NULL,NULL,'$2y$10$..GzvBcXQM8DychqkNIphewKcnXdzqR1ydUy5BQwp5fo7wbSWWR6y',1,'$2y$10$0rGvqOhPc.AE5Xx1ASHYn.HAxLRPzC/TGbzbs/pSllZgStt9DbNtO',NULL);
 /*!40000 ALTER TABLE `users` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
@@ -146,4 +147,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2016-12-20 18:02:36
+-- Dump completed on 2016-12-22 20:02:48
