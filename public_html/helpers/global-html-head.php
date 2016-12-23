@@ -1,3 +1,4 @@
+<?php require_once("renderer.php"); ?>
 <html>
 <head>
 	<!-- jQuery -->

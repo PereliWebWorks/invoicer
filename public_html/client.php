@@ -24,10 +24,6 @@
 	$items = getInvoiceItems($currentInvoice);
 ?>
 <?php require_once("helpers/global-html-head.php"); ?>
-	<script> 
-		var current_total_duration = <?= getTotalDuration($currentInvoice); ?>; //Cost in cents
-		var current_total_cost = <?= getTotalCost($currentInvoice); ?>; //Duration in minutes
-	</script>
 	<!-- CLIENT INFO -->
 	<div class="row cient-info">
 		<h1 class="col-xs-12"><?= $client["name"]; ?></h1>
@@ -80,25 +76,8 @@
 						data = $.parseJSON(data);
 						if (data["success"])
 						{
-							$("#response").html("Item added;")
-							//Add invoice item
-							var description_string = json.item.description;
-							var duration_string = `(${json.item.duration} minutes)`;
-							var rate = <?= $rate; ?>;
-							var cost_string = "$" + (rate / 100 * json.item.duration / 60).toFixed(2);
-							$("#item-table").append(
-								$(document.createElement("tr"))
-									.html("<td>" + description_string + " " + duration_string + "</td>"
-											+ "<td>" + cost_string + "</td>")
-							);
-							current_total_cost = Number(current_total_cost);
-							current_total_duration = Number(current_total_duration);
-							current_total_cost += Number(rate * json.item.duration / 60);
-							current_total_duration += Number(json.item.duration);
-							//Update total cost and total duration
-							//first total cost
-							$("#total-cost").html((current_total_cost / 100).toFixed(2));
-							$("#total-duration").html(current_total_duration);
+							$("#response").html("Item added.");
+							window.location.reload(true);
 						}
 						else
 						{
@@ -121,6 +100,10 @@
 	<hr/>
 	<!-- INVOICE -->
 	<div class="row invoice-container">
+		<div class="col-xs-12 col-sm-8 col-sm-offset-2">
+			<input type="button" class="btn btn-success" id="publish-btn" value="Publish and Send" />
+		</div>
+		<div class="col-xs-12">&nbsp;</div>
 		<div class="invoice col-sm-8 col-xs-12 col-sm-offset-2">
 			<div class="col-xs-12 header-container">
 				<h1 class="col-xs-12">Invoicer for <?= $client["name"]; ?></h1>
@@ -174,15 +157,10 @@
 			</div>
 			<div class="col-xs-12 total-container">
 				<div class="col-xs-12">
-					Total Duration: <span id="total-duration">
-										<script>document.write(current_total_duration);</script>
-									</span>
-									minutes
+					Total Duration: <?= getTotalDuration($currentInvoice); ?> minutes
 				</div>
 				<h4 class="col-xs-12">
-					Total Cost: $<span id="total-duration"><script>document.write((current_total_cost/100).toFixed(2));
-															</script>
-								</span>
+					Total Cost: $<?= number_format(getTotalCost($currentInvoice) / 100, 2); ?>
 				</h4>
 			</div>
 		</div>

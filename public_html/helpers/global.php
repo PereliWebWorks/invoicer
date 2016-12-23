@@ -103,13 +103,19 @@
 		if ($st->rowCount() === 0){return false;}
 		return ($st->fetch(PDO::FETCH_ASSOC));
 	}
+	function getInvoice($id)
+	{
+		if (!loggedIn()){return false;}
+	}
 	function getCurrentInvoice($client_id)
 	{
 		if (!loggedIn()){return false;}
 		$db = $GLOBALS['db'];
-		$q = "SELECT * FROM invoices WHERE id=:id";
+		$q = "SELECT * FROM invoices WHERE id=:id AND status=:status";
 		$st = $db->prepare($q);
 		$st->bindParam(":id", $client_id);
+		$status = 0;
+		$st->bindParam(":status", $status); //0 is active status
 		$st->execute();
 		if ($st->rowCount() === 0){return false;}
 		return ($st->fetch(PDO::FETCH_ASSOC));
