@@ -99,41 +99,61 @@
 	</div>
 	<!-- END ITEM FORM -->
 	<hr/>
-	<!-- INVOICE -->
-	<div class="row">
-		<div class="col-xs-12 col-sm-8 col-sm-offset-2">
-			<input type="button" class="btn btn-success col-xs-2" id="publish-btn" value="Publish and Send" />
-			<div class="col-xs-1"></div>
-			<a href="preview-invoice.php?i=<?= $currentInvoice['id']; ?>"
-				class="col-xs-2 btn btn-default"
-				target="_blank">
-				Preview Invoice
-			</a>
-			<div class="col-xs-12">&nbsp;</div>
-			<div class="col-xs-12 invoice-container">
-			<?php 
-				$renderer->invoice = $currentInvoice; 
-				$renderer->render("invoice");
-			?>
+	<!--******************
+		INVOICES 
+	******************-->
+	<!-- CURRENT INVOICE -->
+	<?php if ($currentInvoice) : ?>
+		<div class="row">
+			<div class="col-xs-12 col-sm-8 col-sm-offset-2">
+				<input type="button" class="btn btn-success col-xs-2" id="publish-btn" value="Publish and Send" />
+				<div class="col-xs-1"></div>
+				<a href="preview-invoice.php?i=<?= $currentInvoice['id']; ?>"
+					class="col-xs-2 btn btn-default"
+					target="_blank">
+					Preview Invoice
+				</a>
+				<div class="hidden message" id="publish-response"></div>
+				<div class="col-xs-12">&nbsp;</div>
+				<div class="col-xs-12 invoice-container">
+				<?php 
+					$renderer->invoice = $currentInvoice; 
+					$renderer->render("invoice");
+				?>
+				</div>
 			</div>
 		</div>
-	</div>
-	<script>
-		$("#publish-btn").click(function(){
-			var data = {invoice_id: <?= $currentInvoice['id']; ?>};
-			$.ajax({
-				type: "POST",
-				url: "helpers/CRUD/publish-invoice.php",
-				data: data
-			}).done(function(data)
-			{
-				data = $.trim(data);
-				data = $.parseJSON(data);
-				console.log(data);
-			});
-		})
-	</script>
-	<hr/>
+		<script>
+			$("#publish-btn").click(function(){
+				$("#publish-response").removeClass("bg-danger text-danger")
+					.addClass("bg-success text-success")
+					.html("Processing...")
+				var data = {invoice_id: <?= $currentInvoice['id']; ?>};
+				$.ajax({
+					type: "POST",
+					url: "helpers/CRUD/publish-invoice.php",
+					data: data
+				}).done(function(data)
+				{
+					data = $.trim(data);
+					data = $.parseJSON(data);
+					if (data.success)
+					{
+						window.location.reload();
+					}
+					else
+					{
+						$("#publish-response").removeClass("bg-success text-success")
+							.addClass("bg-danger text-danger")
+							.html(data.message);
+					}
+				});
+			})
+		</script>
+		<hr/>
+	<?php endif ?>
+	<!-- END CURRENT INVOICE -->
+	<!-- PENDING INVOICES -->
 	<div class="row">
 		<div class="col-xs-12 col-sm-8 col-sm-offset-2">
 			<h3>Pending Invoices</h3>
@@ -150,6 +170,7 @@
 			<?php endforeach ?>
 		</div>
 	</div>
+	<!-- END PENDING INVOICES
 	
 <?php require_once("helpers/global-html-foot.php"); ?>
 

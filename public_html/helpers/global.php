@@ -306,4 +306,5 @@
 		echo "<input type='button' value='Submit' id='{$form_name}_submit_btn' name='{$form_name}[submit]' class='btn btn-default' />";
 		echo "</form>";
 	}
+
 ?>
