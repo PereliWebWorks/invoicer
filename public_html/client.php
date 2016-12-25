@@ -18,6 +18,7 @@
 		die();
 	}
 	$user = currentUser();
+	$invoices = getInvoices($client["id"]);
 	$currentInvoice = getCurrentInvoice($client_id);
 	$rate = $client["default_rate"];
 	//Get the invoice items
@@ -99,15 +100,55 @@
 	<!-- END ITEM FORM -->
 	<hr/>
 	<!-- INVOICE -->
-	<div class="row invoice-container">
+	<div class="row">
 		<div class="col-xs-12 col-sm-8 col-sm-offset-2">
-			<input type="button" class="btn btn-success" id="publish-btn" value="Publish and Send" />
+			<input type="button" class="btn btn-success col-xs-2" id="publish-btn" value="Publish and Send" />
+			<div class="col-xs-1"></div>
+			<a href="preview-invoice.php?i=<?= $currentInvoice['id']; ?>"
+				class="col-xs-2 btn btn-default"
+				target="_blank">
+				Preview Invoice
+			</a>
+			<div class="col-xs-12">&nbsp;</div>
+			<div class="col-xs-12 invoice-container">
+			<?php 
+				$renderer->invoice = $currentInvoice; 
+				$renderer->render("invoice");
+			?>
+			</div>
 		</div>
-		<div class="col-xs-12">&nbsp;</div>
-		<?php 
-			$renderer->invoice = $currentInvoice; 
-			$renderer->render("invoice.php");
-		?>
+	</div>
+	<script>
+		$("#publish-btn").click(function(){
+			var data = {invoice_id: <?= $currentInvoice['id']; ?>};
+			$.ajax({
+				type: "POST",
+				url: "helpers/CRUD/publish-invoice.php",
+				data: data
+			}).done(function(data)
+			{
+				data = $.trim(data);
+				data = $.parseJSON(data);
+				console.log(data);
+			});
+		})
+	</script>
+	<hr/>
+	<div class="row">
+		<div class="col-xs-12 col-sm-8 col-sm-offset-2">
+			<h3>Pending Invoices</h3>
+			<?php foreach($invoices as $invoice) : ?>
+				<?php if ($invoice["status"] === "1") : ?>
+					<div class="col-xs-12">&nbsp;</div>
+					<div class="col-xs-12 invoice-container">
+					<?php
+						$renderer->invoice = $invoice; 
+						$renderer->render("invoice");
+					?>
+					</div>
+				<?php endif ?>
+			<?php endforeach ?>
+		</div>
 	</div>
 	
 <?php require_once("helpers/global-html-foot.php"); ?>

@@ -38,7 +38,9 @@ FORMS
 INVOICES
 ---------------
 **************/
+.invoice-container{
+	border: 1px solid #ddd;
+}
 .invoice{
   padding: 1em;
-  border: 1px solid #ddd !important;
 }

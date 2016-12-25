@@ -1,4 +1,5 @@
 secrets/
 sftp-config.json
-public_html/jQuery
+public_html/
+vendor/
 

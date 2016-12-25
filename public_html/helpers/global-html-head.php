@@ -1,40 +1,6 @@
 <?php require_once("renderer.php"); ?>
 <html>
-<head>
-	<!-- jQuery -->
-	<script src="jQuery/jquery.js"></script>
-	<!-- jquery ui -->
-	<link href="jQuery/jQuery_ui/jquery-ui.min.css" type="text/css" rel="stylesheet" />
-	<link href="jQuery/jQuery_ui/jquery-ui.structure.min.css" type="text/css" rel="stylesheet" />
-	<link href="jQuery/jQuery_ui/jquery-ui.theme.min.css" type="text/css" rel="stylesheet" />
-	<script src="jQuery/jQuery_ui/jquery-ui.min.js"></script>
-	<!-- jQuery serialize stuff -->
-	<script src="jQuery/jquery.serializejson.js"></script>
-	<!-- Bootstrap -->
-	<link rel="stylesheet" href="custom_bootstrap/css/bootstrap.min.css">
-	<link rel="stylesheet" href="custom_bootstrap/css/bootstrap-theme.min.css">
-	<script src="custom_bootstrap/js/bootstrap.min.js"></script>
-	<!-- Custom global css -->
-	<link rel="stylesheet" href="css/style.css" type="text/css" />
-	<script>
-		function validateRequiredFields(formId)
-		{
-			var valid = true;
-			$("#" + formId + " .required").each(function(index, element){
-				if (!$(element).val()) //If a required input is empty
-				{
-					valid = false;
-					$(element).closest(".form-group").addClass("form-error");
-				}
-				else
-				{
-					$(element).closest(".form-group").removeClass("form-error");
-				}
-			});
-			return valid;
-		}
-	</script>
-</head>
+<?php require_once("head.php"); ?>
 <body>
 	<nav class="navbar navbar-default">
 		<div class="container-fluid">

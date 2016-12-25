@@ -1,4 +1,5 @@
 <?php
+	require_once __DIR__ . "/../../vendor/autoload.php";
 	session_start();
 	define("HOST", "invoicer.drewpereli.com");
 
@@ -106,12 +107,36 @@
 	function getInvoice($id)
 	{
 		if (!loggedIn()){return false;}
+		$db = $GLOBALS['db'];
+		$q = "SELECT * FROM invoices WHERE id=:id";
+		$st = $db->prepare($q);
+		$st->bindParam(":id", $id);
+		$st->execute();
+		if ($st->rowCount() === 0){return false;}
+		return ($st->fetch(PDO::FETCH_ASSOC));
+	}
+	function getInvoiceOwnerId($invoice_id)
+	{
+		$invoice = getInvoice($invoice_id);
+		$client = getClient($invoice["client_id"]);
+		return $client["user_id"];
+	}
+	function getInvoices($client_id)
+	{
+		if (!loggedIn()){return false;}
+		$db = $GLOBALS['db'];
+		$q = "SELECT * FROM invoices WHERE client_id=:id ORDER BY status ASC";
+		$st = $db->prepare($q);
+		$st->bindParam(":id", $client_id);
+		$st->execute();
+		if ($st->rowCount() === 0){return false;}
+		return ($st->fetchAll(PDO::FETCH_ASSOC));
 	}
 	function getCurrentInvoice($client_id)
 	{
 		if (!loggedIn()){return false;}
 		$db = $GLOBALS['db'];
-		$q = "SELECT * FROM invoices WHERE id=:id AND status=:status";
+		$q = "SELECT * FROM invoices WHERE client_id=:id AND status=:status";
 		$st = $db->prepare($q);
 		$st->bindParam(":id", $client_id);
 		$status = 0;

@@ -5,9 +5,9 @@
 			$this->rate = $this->client["default_rate"];
 		?>
 
-		<div class="invoice col-sm-8 col-xs-12 col-sm-offset-2">
+		<div class="invoice col-xs-12">
 			<div class="col-xs-12 header-container">
-				<h1 class="col-xs-12">Invoicer for <?= $this->client["name"]; ?></h1>
+				<h1 class="col-xs-12">Invoice for <?= $this->client["name"]; ?></h1>
 			</div>
 			<div class="col-xs-12 id-container">
 				<div class="col-xs-12">ID: <?= getInvoiceSlug($this->invoice); ?></div>
