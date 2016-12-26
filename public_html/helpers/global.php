@@ -9,24 +9,25 @@
 	
 	
 	require_once("connectToDB.php");
+	require_once(__DIR__ . "/../../models/autoloader.php");
 
 	function logInViaCookie($id)
 	{
-		$_SESSION["user_id"] = $id;
+		logIn();
 		rememberUser();
 	}
 	function logIn($id)
 	{
-		$_SESSION["user_id"] = $id;
+		$_SESSION["user"] = User::find($id);
 	}
 	function logOut()
 	{
 		forgetUser();
-		$_SESSION["user_id"] = null;
+		unset($_SESSION["user"]);
 	}
 	function loggedIn()
 	{
-		if (isset($_SESSION["user_id"]))
+		if (getCurrentUser())
 		{
 			return true;
 		}
