@@ -1,5 +1,5 @@
 <?php
-	class Client extends Model
+	final class Client extends Model
 	{
 		const TABLE_NAME = "clients";
 		function getUser()

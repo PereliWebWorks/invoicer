@@ -8,7 +8,7 @@
 		die();
 	}
 	$new_client = $_POST["new-client"];
-	$_POST["new-client"] = null;
+	unset($_POST["new-client"]);
 	$required_fields = array("name", "email", "default_rate");
 	//Make sure all required fields are present
 	foreach ($required_fields as $field)

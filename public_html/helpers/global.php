@@ -1,5 +1,6 @@
 <?php
 	require_once __DIR__ . "/../../vendor/autoload.php";
+	require_once(__DIR__ . "/../../models/autoloader.php");
 	session_start();
 	define("HOST", "invoicer.drewpereli.com");
 
@@ -9,22 +10,21 @@
 	
 	
 	require_once("connectToDB.php");
-	require_once(__DIR__ . "/../../models/autoloader.php");
 
-	function logInViaCookie($id)
+	/*
+	function logInViaCookie()
 	{
-		logIn();
-		rememberUser();
+		logIn($_COOKIE["user_id"]);
+		getCurrentUser()->remember();
 	}
-	function logIn($id)
-	{
-		$_SESSION["user"] = User::find($id);
-	}
+	*/
+	/*
 	function logOut()
 	{
 		forgetUser();
 		unset($_SESSION["user"]);
 	}
+	*/
 	function loggedIn()
 	{
 		if (getCurrentUser())
@@ -33,6 +33,17 @@
 		}
 		return false;
 	}
+	function currentRememberCookiesValid()
+	{
+		if (empty($_COOKIE["user_id"]) || empty($_COOKIE["remember_token"])){return false;}
+		$id = $_COOKIE["user_id"];
+		$token = $_COOKIE["remember_token"];
+		$user = User::find($id);
+		if (!$user){return false;}
+		if (!password_verify($token, $user->remember_digest)){return false;}
+		return true;
+	}
+	/*
 	function rememberUser()
 	{
 		if (!loggedIn()){return false;}
@@ -49,6 +60,8 @@
 		$st->bindParam(":id", $_SESSION["user_id"]);
 		$st->execute();
 	}
+	*/
+	/*
 	function forgetUser()
 	{
 		if (!loggedIn()){return false;}
@@ -60,7 +73,9 @@
 		$st->bindParam(":id", $_SESSION["user_id"]);
 		$st->execute();
 	}
+	*/
 	//When a user goes to the site, this will see if they are remembered. If so it will log them in.
+	/*
 	function currentUserIsRemembered()
 	{
 		if (empty($_COOKIE["user_id"]) || empty($_COOKIE["remember_token"]))
@@ -82,18 +97,14 @@
 		}
 		return true;
 	}
-
+	*/
 	//Returns an array with all the info about the current user
-	function currentUser()
+	function getCurrentUser()
 	{
-		if (!loggedIn()){return false;}
-		$db = $GLOBALS['db'];
-		$q = "SELECT * FROM users WHERE id=:id";
-		$st = $db->prepare($q);
-		$st->bindParam(":id", $_SESSION["user_id"]);
-		$st->execute();
-		return $st->fetch(PDO::FETCH_ASSOC);
+		if (empty($_SESSION["user"])){return false;}
+		return $_SESSION["user"];
 	}
+	/*
 	function getClient($id)
 	{
 		if (!loggedIn()){return false;}
@@ -105,6 +116,7 @@
 		if ($st->rowCount() === 0){return false;}
 		return ($st->fetch(PDO::FETCH_ASSOC));
 	}
+
 	function getInvoice($id)
 	{
 		if (!loggedIn()){return false;}
@@ -184,7 +196,7 @@
 		$slug .= $invoice_id;
 		return $slug;
 	}
-
+	*/
 	function setFlash($type, $message)
 	{
 		$_SESSION["flash"][$type] = $message;

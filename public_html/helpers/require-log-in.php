@@ -2,12 +2,12 @@
 <?php
 	if (!loggedIn())
 	{
-		if (!currentUserIsRemembered())
+		if (!currentRememberCookiesValid())
 		{
 			header("Location: http://" . HOST . "/sign-up.php");
 			die();
 		}
-		logIn($_COOKIE["user_id"]);
+		User::find($_COOKIE["user_id"])->logIn()->remember();
 		setFlash("success", "Welcome back!");
 	}
 ?>

@@ -1,5 +1,5 @@
 <?php
-	class Item extends Model
+	final class Item extends Model
 	{
 		const TABLE_NAME = "items";
 		function getInvoice()

@@ -5,36 +5,34 @@
 		echo "Password and email must be set.";
 		die();
 	}
-	$query = "SELECT id, password_digest, activated FROM users WHERE email=:email";
-	$stmt = $db->prepare($query);
-	$stmt->bindParam(":email", $_POST["log-in"]["email"]);
-	$stmt->execute();
-	if ($stmt->rowCount() !== 1)//If bad email
+	$user = User::findBy("email", $_POST["log-in"]["email"])[0];
+	if (!$user)
 	{
 		echo "Invalid email address.";
 		die();
 	}
-	$user = $stmt->fetch(PDO::FETCH_ASSOC);
-	if (!password_verify($_POST["log-in"]["password"], $user["password_digest"]))
+	if (!password_verify($_POST["log-in"]["password"], $user->password_digest))
 	{
+		unset($_POST["log-in"]["password"]);
 		echo "Password incorrect.";
 		die();
 	}
-	if ($user["activated"] === "0")
+	unset($_POST["log-in"]["password"]);
+	if (!$user->activated)
 	{
 		echo "You must activate your account. Check your email for an activation link.";
 		die();
 	}
 	//If we're here, we're good!
-	logIn($user["id"]);
+	$user->logIn();
 	//If 'remember me' is set
 	if (!empty($_POST["log-in"]["remember"]))
 	{
-		rememberUser();
+		$user->remember();
 	}
 	else
 	{
-		forgetUser();
+		$user->forget();
 	}
 	echo "SUCCESS";
 

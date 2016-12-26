@@ -94,11 +94,12 @@
 				$st->bindParam(":value", $value);
 				$st->bindParam(":id", $this->data['id']);
 				$st->execute();
+				$this->data[$field] = $value;
 				return $this;
 			}
 			catch (Exception $e)
 			{
-				echo $e['message'];
+				echo $e->getMessage();
 				return false;
 			}
 		}
