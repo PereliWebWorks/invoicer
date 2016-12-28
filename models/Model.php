@@ -4,6 +4,7 @@
 		protected $data;
 		const TABLE_NAME = false;
 		protected static $immutable_fields = array();
+		protected static $unsettable_fields = array(); //Fields that shouldn't be set at creation
 		public static $columns;
 		const DB_NAME = "invoicer";
 		//Returns whether the object as it stands is valid to save.
@@ -240,17 +241,32 @@
 				$q_part_2 = "";
 				foreach(array_column(static::$columns, "Field") as $field)
 				{
-					if (in_array($field, static::$immutable_fields))
+					if (in_array($field, static::$unsettable_fields))
 					{
 						continue;
 					}
+					if (!isset($this->data["$field"]))
+					{
+						continue;
+					}
+					$value = $this->data["$field"];
 					$q_part_1 .= "{$field}, ";
-					$q_part_2 .= ":{$field}, ";
+					$q_part_2 .= "'$value', ";
 				}
 				$q_part_1 = substr($q_part_1, 0, -2); //Strip trailing comma and space.
 				$q_part_2 = substr($q_part_2, 0, -2);
 				$q = "$q ($q_part_1) VALUES ($q_part_2)";
-				echo $q;
+				try
+				{
+					$st = $GLOBALS['db']->prepare($q);
+					$st->execute();
+					return $this;
+				}
+				catch (Exception $e)
+				{
+					throw new Error($e->getMessage());
+					return false;
+				}
 			}
 		}
 
@@ -287,6 +303,7 @@
 		function __construct($args = null)
 		{
 			array_push(static::$immutable_fields, "id");
+			array_push(static::$unsettable_fields, "id");
 			$this->data = $args;
 		}
 		function __set($field, $value)
