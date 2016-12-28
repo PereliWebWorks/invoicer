@@ -1,5 +1,6 @@
 <?php
 	require_once __DIR__ . "/../../vendor/autoload.php";
+	require_once("connectToDB.php");
 	require_once(__DIR__ . "/../../models/autoloader.php");
 	session_start();
 	define("HOST", "invoicer.drewpereli.com");
@@ -9,7 +10,6 @@
 	ini_set('sendmail_from', "noreply@" . HOST);
 	
 	
-	require_once("connectToDB.php");
 
 	/*
 	function logInViaCookie()

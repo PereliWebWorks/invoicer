@@ -2,7 +2,8 @@
 	final class User extends Model
 	{
 		const TABLE_NAME = "users";
-		static $immutable_fields = array("email");
+		protected static $immutable_fields = array("email");
+		public static $columns;
 		function logIn()
 		{
 			$_SESSION["user"] = $this;
@@ -39,5 +40,41 @@
 			$this->update("remember_digest", null);
 			return $this;
 		}
+
+		public function fieldIsValid($field, $value)
+		{
+			//If the base validator fails, return false.
+			//Base validator will also run each field through this validator.
+			if (!parent::fieldIsValid($field, $value)){return false;}
+			//If field is set, so must value, and vice versa
+			if (!empty($field)) //If field (and value) are not empty, validate them
+			{
+				switch ($field)
+				{
+					case "email": //Validate proper form
+						if (!filter_var($value, FILTER_VALIDATE_EMAIL))
+						{
+							echo "Invalid email.";
+							return false;
+						}
+						break;
+				}	
+			}
+			return true;
+		}
 	}
+	User::init();
 ?>
+
+
+
+
+
+
+
+
+
+
+
+
+

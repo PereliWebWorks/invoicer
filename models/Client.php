@@ -2,6 +2,7 @@
 	final class Client extends Model
 	{
 		const TABLE_NAME = "clients";
+		public static $columns;
 		function getUser()
 		{
 			return User::find($this->user_id);
@@ -30,5 +31,11 @@
 			return Invoice::findWhere($condition);
 		}
 		
+		function fieldIsValid($field, $value)
+		{
+			if (!parent::fieldIsValid($field, $value)){return false;}
+			return true;
+		}
 	}
+	Client::init();
 ?>
