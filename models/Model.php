@@ -8,64 +8,10 @@
 		public static $columns;
 		const DB_NAME = "invoicer";
 		//Returns whether the object as it stands is valid to save.
-		//The base function will make sure all required fields are present in $this->data.
-		/*
-		public function isValid($field=null, $value=null)
-		{
-			//If field is set, so must value, and vice versa
-			if (empty($field) && !empty($value))
-			{
-				throw new Error("If value is set, field must be set as well.");
-				return false;
-			}
-			if (!empty($field)) //If $field is set, validate $value
-			{
-				//Get the column info
-				$column = array_filter(static::$columns, function($c) use ($field){
-					return $c["Field"] === $field;
-				});
-				$column = end($column);
-				print_r($column);
-				//If it's a required field, make sure $value is set
-				if ($column["Null"] === "NO" && !isset($value))
-				{
-					echo "'Not Null' field isn't set: {$column['Field']}.";
-					return false;
-				}
-				//If it's a unique column, make sure the model is alright
-				if (!empty($column["Key"]) && $column["Key"] === "UNI")
-				{
-					$shouldntExist = static::findWhere("{$column['Field']} = {$value} AND id<>{$this->data['id']}");
-					if (sizeof($shouldntExist) > 0)
-					{
-						return false;
-					}
-				}
-			}		
-			else //If we're validating all fields
-			{
-				//Make sure all required fields are present
-				foreach (static::$columns as $column)
-				{
-					if ($column["Null"] === "NO" && !isset($this->data[$column["Field"]]))
-					{
-						echo "Missing required column: {$column['Field']}.";
-						return false;
-					}
-					if (isset($this->data[$column["Field"]]))
-					{
-						if (!static::isValid($column["Field"], data[$column["Field"]]))
-						{
-							return false;
-						}
-					}
-				}
-			}
-			return true;
-		}
-		*/
+		//The base-class function will make sure all required fields are present in $this->data.
 		public function isValid()
 		{
+			$r = new Response();
 			foreach (static::$columns as $column)
 			{
 				//If the field is NOT NULL and it is not set
@@ -76,23 +22,26 @@
 					// everything is OK because the default will be set upon save.
 					if (!isset($column["Default"]) && $column["Extra"] !== "auto_increment")
 					{
-						echo "Missing required column: {$column['Field']}.";
-						return false;
+						$r->message = "Missing required column: {$column['Field']}.";
+						return $r;
 					}
 				}
 				if (isset($this->data[$column["Field"]])) //If the data isn't set, we know it's a not null field 
 				// and we don't have to validate it
 				{
-					if (!static::fieldIsValid($column["Field"], $this->data[$column["Field"]]))
+					$field_response = static::fieldIsValid($column["Field"], $this->data[$column["Field"]]);
+					if (!$field_response->success)
 					{
-						return false;
+						return $field_response;
 					}
 				}
 			}
-			return true;
+			$r->success = true;
+			return $r;
 		}
 		public function fieldIsValid($field, $value)
 		{
+			$r = new Response();
 			//Get the column info
 			$column = array_filter(static::$columns, function($c) use ($field){
 				return $c["Field"] === $field;
@@ -112,8 +61,8 @@
 					$shouldntExist = static::findWhere($condition);
 					if (sizeof($shouldntExist) > 0)
 					{
-						echo "Uniqueness constraint failed. COLUMN: $field | VALUE: $value. ";
-						return false;
+						$r->message = "Uniqueness constraint failed. COLUMN: $field | VALUE: $value. ";
+						return $r;
 					}
 				}
 				//If it's a foreign key, make sure a corresponding primary key of value $value exists.
@@ -140,12 +89,30 @@
 					$st->execute();
 					if ($st->rowCount() !== 1)
 					{
-						echo "Invalid foreign key value.";
-						return false;
+						$r->message = "Invalid foreign key value.";
+						return $r;
 					}
 				}
 			}
-			return true;
+			$r->success = true;
+			return $r;
+		}
+		protected function getColumnInfo($fieldName)
+		{
+			foreach (static::$columns as $column)
+			{
+				if ($column["Field"] === $fieldName)
+				{
+					return $column;
+				}
+			}
+			return false;
+		}
+		//Reloads the object from the database
+		protected function reload()
+		{
+			$this->data = static::find($this->data['id'])->data;
+			return $this;
 		}
 
 		public static function find($id)
@@ -191,7 +158,12 @@
 		}
 		public function save()
 		{
-			if (!static::isValid()){return false;}
+			$r = new Response();
+			$validator_response = static::isValid();
+			if (!$validator_response->success)
+			{
+				return $validator_response;
+			}
 			$table = static::TABLE_NAME;
 			if (!empty($this->data['id'])) //If we're saving an existing user.
 			{
@@ -223,20 +195,21 @@
 					$st->execute();
 					if ($st->rowCount() === 0)
 					{
-						echo "Invalid id.";
-						return false;
+						$r->message = "Bad ID.";
+						return $r;
 					}
-					return $this;
+					$r->success = true;
+					return $r;
 				}
 				catch (Exception $e)
 				{
 					throw new Error($e->getMessage());
-					return false;
+					$r->message = "Update query error.";
+					return $r;
 				}
 			}
 			else //If we're creating a new user
 			{
-				$q = "INSERT INTO $table";
 				$q_part_1 = "";
 				$q_part_2 = "";
 				foreach(array_column(static::$columns, "Field") as $field)
@@ -245,33 +218,48 @@
 					{
 						continue;
 					}
-					if (!isset($this->data["$field"]))
+					if (!isset($this->data[$field]))
 					{
 						continue;
 					}
 					$value = $this->data["$field"];
+					//If field type is integer and value is false, continue
+					$column = static::getColumnInfo($field);
+					$type = explode("(", $column["Type"])[0];
+					if ($type === "int" || $type === "tinyint")
+					{
+						if (!is_numeric($value))
+						{
+							continue;
+						}
+					}
 					$q_part_1 .= "{$field}, ";
 					$q_part_2 .= "'$value', ";
 				}
 				$q_part_1 = substr($q_part_1, 0, -2); //Strip trailing comma and space.
 				$q_part_2 = substr($q_part_2, 0, -2);
-				$q = "$q ($q_part_1) VALUES ($q_part_2)";
+				$q = "INSERT INTO $table ($q_part_1) VALUES ($q_part_2)";
 				try
 				{
 					$st = $GLOBALS['db']->prepare($q);
 					$st->execute();
-					return $this;
+					$this->data['id'] = $GLOBALS['db']->lastInsertId();
+					$this->reload();
+					$r->success = true;
+					return $r;
 				}
 				catch (Exception $e)
 				{
 					throw new Error($e->getMessage());
-					return false;
+					$r->message = "Insert query error.";
+					return $r;
 				}
 			}
 		}
 
 		public function update($field, $value)
 		{
+			$r = new Response();
 			if (!static::fieldIsValid($field, $value)){return false;}
 			$table = static::TABLE_NAME;
 			$q = "UPDATE $table SET $field=:value WHERE id=:id";
@@ -289,6 +277,15 @@
 				throw new Error($e->getMessage());
 				return false;
 			}
+		}
+
+		public function destroy()
+		{
+			$t = static::TABLE_NAME;
+			$q = "DELETE FROM $t WHERE id=:id";
+			$st = $GLOBALS['db']->prepare($q);
+			$st->bindParam(":id", $this->data['id']);
+			$st->execute();
 		}
 
 		static function init()

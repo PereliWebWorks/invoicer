@@ -8,35 +8,27 @@
 	}
 	$id = $_GET["i"];
 	$code = $_GET["c"];
+	$user = User::find($id);
 	//If the id doesn't exist, send to sign up
-	$query = "SELECT activated, activation_code_digest FROM users WHERE id=:id";
-	$stmt = $db->prepare($query);
-	$stmt->bindParam(":id", $id);
-	$stmt->execute();
-	if ($stmt->rowCount() !== 1) //If bad id
+	if (!$user) //If bad id
 	{
 		header("Location: http://" . HOST . "/sign-up.php");
 		die();
 	}
 	//If account is already activated
-	$result = $stmt->fetch(PDO::FETCH_ASSOC);
-	if ($result["activated"] === "1")
+	if ($user->activated)
 	{
 		header("Location: http://" . HOST . "/log-in.php");
 		die();
 	}
-	$code_digest = $result["activation_code_digest"];
-	if (!password_verify($code, $code_digest))
+	if (!password_verify($code, $user->activation_code_digest))
 	{
 		header("Location: http://" . HOST . "/sign-up.php");
 		die();
 	}
 	//Else, we're all good! Set the account to activated.
-	$query = "UPDATE users SET activated=1, activation_code_digest=NULL, WHERE id=:id";
-	$stmt = $db->prepare($query);
-	$stmt->bindParam(":id", $id);
-	$stmt->execute();
-	logIn($id);
+	$user->update("activated", true);
+	$user->logIn();
 	setFlash("success", "Your account has been activated.");
 	header("Location: http://" . HOST . "/index.php");
 	die();

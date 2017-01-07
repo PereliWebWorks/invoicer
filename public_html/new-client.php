@@ -37,17 +37,17 @@
 				data: json,
 			}).done(function(data){
 				data = $.trim(data);
-				if (data.split("_")[0] === "success")
+				data = $.parseJSON(data);
+				if (data.success)
 				{
-					$("#response").html("Client added.");
-					var id = data.split("_")[1];
-					window.location.replace("client.php?c=" + id);
+					$("#response").html(data.message);
+					window.location.replace("client.php?c=" + data.client_id);
 				}
 				else
 				{
 					$("#response").removeClass("bg-success text-success")
 						.addClass("bg-danger text-danger")
-						.html(data);
+						.html(data.message);
 				}
 			});
 		}

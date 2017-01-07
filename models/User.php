@@ -43,9 +43,11 @@
 
 		public function fieldIsValid($field, $value)
 		{
+			$r = new Response();
 			//If the base validator fails, return false.
 			//Base validator will also run each field through this validator.
-			if (!parent::fieldIsValid($field, $value)){return false;}
+			$field_response = parent::fieldIsValid($field, $value);
+			if (!$field_response->success){return $field_response;}
 			//If field is set, so must value, and vice versa
 			if (!empty($field)) //If field (and value) are not empty, validate them
 			{
@@ -54,13 +56,14 @@
 					case "email": //Validate proper form
 						if (!filter_var($value, FILTER_VALIDATE_EMAIL))
 						{
-							echo "Invalid email.";
-							return false;
+							$r->message = "Invalid email.";
+							return $r;
 						}
 						break;
 				}	
 			}
-			return true;
+			$r->success = true;
+			return $r;
 		}
 	}
 	User::init();

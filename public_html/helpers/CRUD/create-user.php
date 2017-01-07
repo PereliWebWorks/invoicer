@@ -1,74 +1,40 @@
 <?php require_once("../global.php"); ?>
 <?php
+	$r = new Response();
 	if (empty($_POST["new-user"]))
 	{
+		echo $r;
 		die();
 	}
-	$_POST = $_POST["new-user"];
-	$_POST["new-user"] = null;
-
-	if (empty($_POST["username"]))
+	$new_user_info = $_POST["new-user"];
+	unset($_POST);
+	if (empty($new_user_info['password']))
 	{
-		echo "Name must be present.";
+		echo $r;
 		die();
 	}
-	if (empty($_POST["email"]))
+	$new_user_info["password_digest"] = password_hash($new_user_info["password"], PASSWORD_DEFAULT);
+	unset($new_user_info["password"]);
+	if (!password_verify($new_user_info["password-confirmation"], $new_user_info["password_digest"]))
 	{
-		echo "Email must be present.";
+		echo $r;
 		die();
 	}
-	if (!filter_var($_POST["email"], FILTER_VALIDATE_EMAIL))
-	{
-		echo "Invalid email.";
-		die();
-	}
-	$query = "SELECT email FROM users WHERE email=:email";
-	$stmt = $db->prepare($query);
-	$stmt->bindParam(":email", $_POST["email"]);
-	$stmt->execute();
-	if ($stmt->rowCount() !== 0)
-	{
-		echo "There is already an account set up with that email address.";
-		die();
-	}
-	if (empty($_POST["password"]) || strlen($_POST["password"]) < 6 )
-	{
-		echo ($_POST["password"]);
-		echo "Invalid password.";
-		die();
-	}
-	$pwd_hash = password_hash($_POST["password"], PASSWORD_DEFAULT);
-	$_POST["password"] = null; 
-	if (empty($_POST["password-confirmation"]))
-	{
-		echo "Invalid password confirmation.";
-		die();
-	}
-	if (!password_verify($_POST["password-confirmation"], $pwd_hash))
-	{
-		echo "Passwords do not match.";
-		die();
-	}
-	$_POST["password-confirmation"] = null;
-	//Everything is valid
 	$activation_code = md5(rand());
-	$activation_code_digest = password_hash($activation_code, PASSWORD_DEFAULT);
-	//Insert the new user into the database
-	$query = "INSERT INTO users (name, email, password_digest, activation_code_digest) VALUES (:name, :email, :pwd, :ac_digest)";
-	$stmt = $db->prepare($query);
-	$stmt->bindParam(":name", $_POST["username"]);
-	$stmt->bindParam(":email", $_POST["email"]);
-	$stmt->bindParam(":pwd", $pwd_hash);
-	$stmt->bindParam(":ac_digest", $activation_code_digest);
-	$stmt->execute();
+	$new_user_info["activation_code_digest"] = password_hash($activation_code, PASSWORD_DEFAULT);
+	$new_user = new User($new_user_info);
+	$save_response = $new_user->save();
+	if (!$save_response->success)
+	{
+		$response["message"] = $save_response["message"];
+		$new_user->destroy();
+		echo json_encode($response);
+		die();
+	}
 	//Send the email
-	$query = "SELECT id FROM users WHERE email=:email";
-	$stmt = $db->prepare($query);
-	$stmt->bindParam(":email", $_POST["email"]);
-	$stmt->execute();
-	$id = $stmt->fetch(PDO::FETCH_ASSOC)["id"];
+	$id = $new_user->id;
 	$activation_url = HOST . "/activate.php?i={$id}&c={$activation_code}";
-	$to = $_POST["email"];
+	$to = $new_user->email;
 	$subject = "Thanks for signing up with Invoicer";
 	$headers[] = 'MIME-Version: 1.0';
 	$headers[] = 'Content-type: text/html; charset=iso-8859-1';
@@ -80,15 +46,14 @@
 	$result = mail($to, $subject, $message, implode("\r\n", $headers));
 	if ($result)
 	{
-		echo "success";
+		$response["message"] = "You've been added! Check your email for a confirmation link.";
+		$response["success"] = true;
+		echo json_encode($response);
 	}
 	else
 	{
 		echo "There was an issue sending the activation email. Try again later.";
-		$query = "DELETE FROM users WHERE id=:id";
-		$stmt = $db->prepare($query);
-		$stmt->bindParam(":id", $id);
-		$stmt->execute();
+		$user->destroy();
 	}
 ?>
 

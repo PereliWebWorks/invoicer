@@ -209,6 +209,7 @@
 
 	function getIntFromPhone($phone_number)
 	{
+		if (!is_numeric($phone_number)){return false;}
 		$p = preg_replace('/[^0-9]/','',$phone_number);
 		$p = intval($p);
 		return $p;

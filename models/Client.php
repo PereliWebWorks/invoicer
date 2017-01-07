@@ -33,9 +33,36 @@
 		
 		function fieldIsValid($field, $value)
 		{
-			if (!parent::fieldIsValid($field, $value)){return false;}
-			return true;
+			$r = new Response();
+			$r1 = parent::fieldIsValid($field, $value);
+			if (!$r1->success){return $r1;}
+			switch ($field)
+			{
+				case "email":
+					if (!filter_var($value, FILTER_VALIDATE_EMAIL))
+					{
+						$r->message = "Invalid email.";
+						return $r;
+					}
+					break;
+				case "rate":
+					if (!is_numeric($value))
+					{
+						$r->message="Rate must be numeric.";
+						return $r;
+					}
+					break;
+			}
+			$r->success = true;
+			return $r;
+		}
+		
+		function save()
+		{
+			$this->phone = getIntFromPhone($this->phone);
+			return parent::save();
 		}
 	}
 	Client::init();
 ?>
+

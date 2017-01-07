@@ -3,7 +3,7 @@
 	<h1>Sign Up</h1>
 	<?php
 		$form_fields = array(
-				array("label"=>"Name", "name"=>"username", "type"=>"text", "required"=>true),
+				array("label"=>"Name", "name"=>"name", "type"=>"text", "required"=>true),
 				array("label"=>"Email", "name"=>"email", "type"=>"email", "required"=>true),
 				array("label"=>"Password", "name"=>"password", "type"=>"password", "required"=>true),
 				array("label"=>"Confirm Password", "name"=>"password-confirmation", "type"=>"password", "required"=>true),
@@ -42,15 +42,16 @@
 					data: json,
 				}).done(function(data){
 					data = $.trim(data);
-					if (data === "success")
+					data = $.parseJSON(data);
+					if (data["success"])
 					{
-						$("#response").html("You've been added! Check your email for a confirmation link.")
+						$("#response").html(data["message"]);
 					}
 					else
 					{
 						$("#response").removeClass("bg-success text-success")
 							.addClass("bg-danger text-danger")
-							.html(data);
+							.html(data["message"]);
 					}
 				});
 			}
