@@ -48,8 +48,7 @@
 							<td>
 								$
 								<?php //Get cost
-									$hours = $item->duration_in_hours;
-									echo number_format(($this->rate_in_dollars * $hours), 2); 
+									echo number_format($item->cost_in_dollars, 2); 
 								?>
 							</td>
 						</tr>

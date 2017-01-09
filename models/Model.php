@@ -260,7 +260,8 @@
 		public function update($field, $value)
 		{
 			$r = new Response();
-			if (!static::fieldIsValid($field, $value)){return false;}
+			$r1 = static::fieldIsValid($field, $value);
+			if (!$r1->success){return $r1;}
 			$table = static::TABLE_NAME;
 			$q = "UPDATE $table SET $field=:value WHERE id=:id";
 			try
@@ -270,12 +271,14 @@
 				$st->bindParam(":id", $this->data['id']);
 				$st->execute();
 				$this->data[$field] = $value;
-				return $this;
+				$r->success = true;
+				$r->message = "Updated.";
+				return $r;
 			}
 			catch (Exception $e)
 			{
 				throw new Error($e->getMessage());
-				return false;
+				return $r;
 			}
 		}
 

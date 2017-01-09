@@ -2,6 +2,7 @@
 	final class Invoice extends Model
 	{
 		const TABLE_NAME = "invoices";
+		public static $columns;
 
 		function __get($name)
 		{
@@ -15,14 +16,14 @@
 					$d = 0;
 					foreach ($this->items as $item)
 					{
-						$d .= $item->duration;
+						$d += intval($item->duration);
 					}
 					return $d;
 				case "duration_in_hours":
 					$d = 0;
 					foreach ($this->items as $item)
 					{
-						$d .= $item->duration;
+						$d += intval($item->duration);
 					}
 					$d /= 60;
 					return $d;

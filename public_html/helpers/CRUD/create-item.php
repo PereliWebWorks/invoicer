@@ -10,13 +10,14 @@
 	$item_info = $_POST["item"];
 	unset($_POST["item"]);
 	$item_info["duration"] = intval($item_info["duration"]);
-	$attempt = new Item($item_info);
-	if ($attempt->success)
+	$item = new Item($item_info);
+	$attempt = $item->save();
+	if (!$attempt->success)
 	{
 		echo $attempt;
 		die();
 	}
 	$r->success = true;
 	$r->message = "Item added.";
-	return $r;
+	echo $r;
 ?>

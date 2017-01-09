@@ -47,7 +47,7 @@
 					<div class="input-group-addon">minutes</div>
 				</div>
 			</div>
-			<input type="hidden" name="item[invoice_id]" value="<?=$currentInvoice['id'];?>" class="required" />
+			<input type="hidden" name="item[invoice_id]" value="<?=$current_invoice->id;?>" class="required" />
 			<div class="form-group col-xs-2">
 				<label>&nbsp;</label><br/>
 				<div type="" id="item_submit-btn" class="btn btn-default">Add Item</div>
@@ -106,7 +106,7 @@
 		<div class="col-xs-12 col-sm-8 col-sm-offset-2">
 			<input type="button" class="btn btn-success col-xs-2" id="publish-btn" value="Publish and Send" />
 			<div class="col-xs-1"></div>
-			<a href="preview-invoice.php?i=<?= $currentInvoice['id']; ?>"
+			<a href="preview-invoice.php?i=<?= $current_invoice->id; ?>"
 				class="col-xs-2 btn btn-default"
 				target="_blank">
 				Preview Invoice
@@ -126,10 +126,15 @@
 				$("#publish-response").removeClass("bg-danger text-danger")
 					.addClass("bg-success text-success")
 					.html("Processing...")
-				var data = {invoice_id: <?= $current_invoice->id; ?>};
+				var data = {
+							invoice: 
+							{
+								id: <?= $current_invoice->id; ?>},
+								status: 1
+							};
 				$.ajax({
 					type: "POST",
-					url: "helpers/CRUD/publish-invoice.php",
+					url: "helpers/CRUD/update-invoice.php",
 					data: data
 				}).done(function(data)
 				{
