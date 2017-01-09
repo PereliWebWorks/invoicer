@@ -12,6 +12,7 @@
 	$new_client_info = $_POST["new-client"];
 	unset($_POST["new-client"]);
 	$new_client_info["user_id"] = getCurrentUser()->id;
+	$new_client_info["default_rate"] *= 100;
 	$client = new Client($new_client_info);
 	$attempt = $client->save();
 	//If "rate" isn't numeric, echo an error
@@ -20,8 +21,8 @@
 		echo $attempt;
 		die();
 	}
-	$_POST["new-invoice"]["client_id"] = $client->id;
-	require("create-invoice.php");
+	$invoice = new Invoice(array("client_id" => $client->id));
+	$invoice->save();
 	$r->client_id = $client->id;
 	$r->success = true;
 	$r->message = "Client added.";

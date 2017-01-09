@@ -3,10 +3,7 @@
 	{
 		const TABLE_NAME = "clients";
 		public static $columns;
-		function getUser()
-		{
-			return User::find($this->user_id);
-		}
+		
 		function getInvoices($status="ALL")
 		{
 			$valid_statuses = array("ALL", "CURRENT", "PENDING", "PAID");
@@ -15,20 +12,20 @@
 				throw new Error("Invalid invoice status: $status<br/>");
 				return;
 			}
-			$condition = "client_id={$this->id}";
+			$c = "client_id={$this->id}";
 			switch ($status)
 			{
 				case "CURRENT":
-					$q .= " AND status=0";
+					$c .= " AND status=0";
 				break;
 				case "PENDING":
-					$q .= " AND status=1";
+					$c .= " AND status=1";
 				break;
 				case "PAID":
-					$q .= " AND status=2";
+					$c .= " AND status=2";
 				break;
 			}
-			return Invoice::findWhere($condition);
+			return Invoice::findWhere($c);
 		}
 		
 		function fieldIsValid($field, $value)
@@ -61,6 +58,19 @@
 		{
 			$this->phone = getIntFromPhone($this->phone);
 			return parent::save();
+		}
+
+		function __get($name)
+		{
+			switch ($name)
+			{
+				case "user":
+					return User::find($this->user_id);
+				case "rate_in_dollars":
+					return $this->data["default_rate"] / 100;
+				default:
+					return parent::__get($name);
+			}
 		}
 	}
 	Client::init();

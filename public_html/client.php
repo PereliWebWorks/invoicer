@@ -10,26 +10,25 @@
 	}
 	$client_id = $_GET["c"];
 	//If the client doesn't belong to the logged in user or doesn't exist, redirect to index
-	$client = getClient($client_id);
-	if (!$client || $client["user_id"] !== $_SESSION["user_id"])
+	$client = Client::find($client_id);
+	if (!$client || $client->user != getCurrentUser())
 	{
-		setFlash("danger", "That is not a client of yours.");
+		setFlash("danger", "This is not a client of yours.");
 		header("Location: index.php");
 		die();
 	}
-	$user = currentUser();
-	$invoices = getInvoices($client["id"]);
-	$currentInvoice = getCurrentInvoice($client_id);
-	$rate = $client["default_rate"];
+	$user = getCurrentUser();
+	$current_invoice = $client->getInvoices("CURRENT")[0];
+	$rate = $client->default_rate;
 	//Get the invoice items
-	$items = getInvoiceItems($currentInvoice);
+	$items = $current_invoice->items;
 ?>
 <?php require_once("helpers/global-html-head.php"); ?>
 	<!-- CLIENT INFO -->
 	<div class="row cient-info">
-		<h1 class="col-xs-12"><?= $client["name"]; ?></h1>
-		<div class="col-xs-12"><?= $client["email"]; ?></div>
-		<div class="col-xs-12">$<?= ($client["default_rate"] / 100) ?> per hour</div>
+		<h1 class="col-xs-12"><?= $client->name; ?></h1>
+		<div class="col-xs-12"><?= $client->email; ?></div>
+		<div class="col-xs-12">$<?= ($client->default_rate / 100) ?> per hour</div>
 	</div>
 	<!-- END CLIENT INFO -->
 	<hr/>
@@ -103,32 +102,31 @@
 		INVOICES 
 	******************-->
 	<!-- CURRENT INVOICE -->
-	<?php if ($currentInvoice) : ?>
-		<div class="row">
-			<div class="col-xs-12 col-sm-8 col-sm-offset-2">
-				<input type="button" class="btn btn-success col-xs-2" id="publish-btn" value="Publish and Send" />
-				<div class="col-xs-1"></div>
-				<a href="preview-invoice.php?i=<?= $currentInvoice['id']; ?>"
-					class="col-xs-2 btn btn-default"
-					target="_blank">
-					Preview Invoice
-				</a>
-				<div class="hidden message" id="publish-response"></div>
-				<div class="col-xs-12">&nbsp;</div>
-				<div class="col-xs-12 invoice-container">
-				<?php 
-					$renderer->invoice = $currentInvoice; 
-					$renderer->render("invoice");
-				?>
-				</div>
+	<div class="row">
+		<div class="col-xs-12 col-sm-8 col-sm-offset-2">
+			<input type="button" class="btn btn-success col-xs-2" id="publish-btn" value="Publish and Send" />
+			<div class="col-xs-1"></div>
+			<a href="preview-invoice.php?i=<?= $currentInvoice['id']; ?>"
+				class="col-xs-2 btn btn-default"
+				target="_blank">
+				Preview Invoice
+			</a>
+			<div class="hidden message" id="publish-response"></div>
+			<div class="col-xs-12">&nbsp;</div>
+			<div class="col-xs-12 invoice-container">
+			<?php 
+				$renderer->invoice = $current_invoice; 
+				$renderer->render("invoice");
+			?>
 			</div>
 		</div>
+	</div>
 		<script>
 			$("#publish-btn").click(function(){
 				$("#publish-response").removeClass("bg-danger text-danger")
 					.addClass("bg-success text-success")
 					.html("Processing...")
-				var data = {invoice_id: <?= $currentInvoice['id']; ?>};
+				var data = {invoice_id: <?= $current_invoice->id; ?>};
 				$.ajax({
 					type: "POST",
 					url: "helpers/CRUD/publish-invoice.php",
@@ -151,22 +149,19 @@
 			})
 		</script>
 		<hr/>
-	<?php endif ?>
 	<!-- END CURRENT INVOICE -->
 	<!-- PENDING INVOICES -->
 	<div class="row">
 		<div class="col-xs-12 col-sm-8 col-sm-offset-2">
 			<h3>Pending Invoices</h3>
-			<?php foreach($invoices as $invoice) : ?>
-				<?php if ($invoice["status"] === "1") : ?>
-					<div class="col-xs-12">&nbsp;</div>
-					<div class="col-xs-12 invoice-container">
-					<?php
-						$renderer->invoice = $invoice; 
-						$renderer->render("invoice");
-					?>
-					</div>
-				<?php endif ?>
+			<?php foreach($client->getInvoices("PENDING") as $invoice) : ?>
+				<div class="col-xs-12">&nbsp;</div>
+				<div class="col-xs-12 invoice-container">
+				<?php
+					$renderer->invoice = $invoice; 
+					$renderer->render("invoice");
+				?>
+				</div>
 			<?php endforeach ?>
 		</div>
 	</div>
