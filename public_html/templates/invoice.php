@@ -34,7 +34,7 @@
 			</div>
 			<div class="col-xs-12">&nbsp;</div>
 			<div class="col-xs-12 rate-container">
-				<div class="col-xs-12">$<?= ($this->client->rate_in_dollars); ?> per hour</div>
+				<div class="col-xs-12">$<?= $this->client->rate_in_dollars_per_hour; ?> per hour</div>
 			</div>
 			<div class="col-xs-12">&nbsp;</div>
 			<div class="col-xs-10 col-xs-offset-1">
@@ -43,13 +43,20 @@
 					<?php foreach($this->items as $item) : ?>
 						<tr>
 							<td>
-								<?= $item->description; ?> (<?= $item->duration; ?> minutes)
+								<?= $item->description; ?> 
+								<?php if (isset($item->duration)) : ?>
+									(<?= $item->duration; ?> minutes)
+								<?php endif ?>
 							</td>
 							<td>
-								$
-								<?php //Get cost
-									echo number_format($item->cost_in_dollars, 2); 
-								?>
+								<?php if (isset($item->cost_in_dollars)) : ?>
+									$
+									<?php //Get cost
+										echo number_format($item->cost_in_dollars, 2); 
+									?>
+								<?php else : ?>
+									--
+								<?php endif ?>
 							</td>
 						</tr>
 					<?php endforeach ?>
@@ -60,7 +67,7 @@
 					Total Duration: <?= $this->invoice->duration; ?> minutes
 				</div>
 				<h4 class="col-xs-12">
-					Total Cost: $<?= number_format($this->invoice->cost, 2); ?>
+					Total Cost: $<?= number_format($this->invoice->cost_in_dollars, 2); ?>
 				</h4>
 			</div>
 		</div>

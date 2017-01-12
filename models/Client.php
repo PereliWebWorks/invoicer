@@ -66,8 +66,8 @@
 			{
 				case "user":
 					return User::find($this->user_id);
-				case "rate_in_dollars":
-					return $this->data["default_rate"] / 100;
+				case "rate_in_dollars_per_hour":
+					return $this->default_rate / 100;
 				default:
 					return parent::__get($name);
 			}

@@ -39,6 +39,9 @@
 				window.location.replace("log-in.php");
 			});
 		});
+		$( function() {
+			$( "[title]" ).tooltip();
+		} );
 	</script>
 
 	<div class="container-fluid" id="content">

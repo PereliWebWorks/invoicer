@@ -36,17 +36,26 @@
 	<div class="row item_form-container">
 		<h3 class="col-xs-12">Add Invoice Item</h3>
 		<form id="item_form" class="">
-			<div class="form-group col-xs-8">
+			<div class="form-group col-xs-6">
 				<label for="item_description">Description</label>
 				<input type="text" name="item[description]" id="item_description" class="form-control required" />
 			</div>
 			<div class="form-group col-xs-2">
 				<label for="item_duration">Duration</label>
 				<div class="input-group">
-					<input type="number" name="item[duration]" id="item_duration" class="form-control required" />
+					<input type="number" name="item[duration]" id="item_duration" class="form-control" />
 					<div class="input-group-addon">minutes</div>
 				</div>
 			</div>
+			<div class="form-group col-xs-2">
+				<label for="item_cost">Cost</label>
+				<div class="input-group">
+					<div class="input-group-addon">$</div>
+					<input type="number" name="item[cost]" id="item_cost" class="form-control" 
+							title="If left blank, the cost will be calculated using this client's hourly rate."/>
+				</div>
+			</div>
+			
 			<input type="hidden" name="item[invoice_id]" value="<?=$current_invoice->id;?>" class="required" />
 			<div class="form-group col-xs-2">
 				<label>&nbsp;</label><br/>
@@ -126,12 +135,14 @@
 				$("#publish-response").removeClass("bg-danger text-danger")
 					.addClass("bg-success text-success")
 					.html("Processing...")
-				var data = {
+				var data = 
+						{
 							invoice: 
 							{
-								id: <?= $current_invoice->id; ?>},
+								id: <?= $current_invoice->id; ?>,
 								status: 1
-							};
+							}
+						};
 				$.ajax({
 					type: "POST",
 					url: "helpers/CRUD/update-invoice.php",
@@ -142,7 +153,14 @@
 					data = $.parseJSON(data);
 					if (data.success)
 					{
-						window.location.reload();
+						$.ajax({
+							type: "POST",
+							url: "helpers/CRUD/create-invoice.php",
+							data: {invoice: {client_id: <?= $client->id; ?>}}
+						}).done(function(data)
+						{
+							window.location.reload();
+						});
 					}
 					else
 					{
@@ -161,12 +179,19 @@
 			<h3>Pending Invoices</h3>
 			<?php foreach($client->getInvoices("PENDING") as $invoice) : ?>
 				<div class="col-xs-12">&nbsp;</div>
+				<div class="col-xs-12">&nbsp;</div>
+				<div class="col-xs-12">
+					<div class="btn btn-success" id="mark-as-paid-btn_<?= $invoice->id; ?>">Mark as Paid</div>
+				</div>
+				<div class="col-xs-12">&nbsp;</div>
 				<div class="col-xs-12 invoice-container">
 				<?php
 					$renderer->invoice = $invoice; 
 					$renderer->render("invoice");
 				?>
 				</div>
+				<div class="col-xs-12">&nbsp;</div>
+				<div class="col-xs-12">&nbsp;</div>
 			<?php endforeach ?>
 		</div>
 	</div>

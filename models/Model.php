@@ -313,13 +313,17 @@
 	        	$this->data[$field] = $value;
 	    	}
 	    }
-
 		function __get($field)
 		{
 			if (array_key_exists($field, $this->data)) {
 	            return $this->data[$field];
 	        }
 	        throw new Error("Invalid property: $field.");
+		}
+		function __isset($field)
+		{
+			$v = $this->__get($field);
+			return isset($v);
 		}
 		function __toString()
 		{

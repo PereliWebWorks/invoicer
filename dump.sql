@@ -38,7 +38,7 @@ CREATE TABLE `clients` (
   PRIMARY KEY (`id`),
   KEY `user_id` (`user_id`),
   CONSTRAINT `clients_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=18 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -47,7 +47,7 @@ CREATE TABLE `clients` (
 
 LOCK TABLES `clients` WRITE;
 /*!40000 ALTER TABLE `clients` DISABLE KEYS */;
-INSERT INTO `clients` VALUES (1,4,'Sample Client','Sample Company','client@gmail.com',2000,NULL,NULL,NULL,NULL,NULL,1),(2,4,'Sample Client 2',NULL,'drewpereli@gmail.com',1500,NULL,NULL,NULL,NULL,NULL,1);
+INSERT INTO `clients` VALUES (16,6,'Myself','','drewpereli@gmail.com',2000,NULL,'','','',NULL,1),(17,6,'Emma W','','emmawatermolen@gmail.com',100000,NULL,'','','',NULL,1);
 /*!40000 ALTER TABLE `clients` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -65,7 +65,7 @@ CREATE TABLE `invoices` (
   PRIMARY KEY (`id`),
   KEY `client_id` (`client_id`),
   CONSTRAINT `invoices_ibfk_1` FOREIGN KEY (`client_id`) REFERENCES `clients` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=19 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -74,7 +74,7 @@ CREATE TABLE `invoices` (
 
 LOCK TABLES `invoices` WRITE;
 /*!40000 ALTER TABLE `invoices` DISABLE KEYS */;
-INSERT INTO `invoices` VALUES (1,1,1),(2,2,0);
+INSERT INTO `invoices` VALUES (14,16,1),(15,16,1),(16,17,1),(17,17,0),(18,16,0);
 /*!40000 ALTER TABLE `invoices` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -89,11 +89,12 @@ CREATE TABLE `items` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `invoice_id` int(11) NOT NULL,
   `description` varchar(1000) NOT NULL,
-  `duration` int(11) NOT NULL,
+  `duration` int(11) DEFAULT NULL,
+  `cost` int(11) DEFAULT NULL, 
   PRIMARY KEY (`id`),
   KEY `invoice_id` (`invoice_id`),
   CONSTRAINT `items_ibfk_1` FOREIGN KEY (`invoice_id`) REFERENCES `invoices` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=15 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=31 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -102,7 +103,7 @@ CREATE TABLE `items` (
 
 LOCK TABLES `items` WRITE;
 /*!40000 ALTER TABLE `items` DISABLE KEYS */;
-INSERT INTO `items` VALUES (11,1,'Test 1',60),(12,1,'Item 2',60),(13,1,'Item 3',45),(14,1,'Item 4',37);
+INSERT INTO `items` VALUES (26,14,'asdfdsa',1, null),(27,16,'Loving Drew',1000, null),(28,16,'Eating popcorn',99999, null),(29,17,'asdfdsa',12, null),(30,15,'asdfdsasdf',10, null);
 /*!40000 ALTER TABLE `items` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -116,7 +117,7 @@ DROP TABLE IF EXISTS `users`;
 CREATE TABLE `users` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `name` varchar(100) NOT NULL,
-  `email` varchar(200) NOT NULL UNIQUE,
+  `email` varchar(200) NOT NULL,
   `phone` int(10) DEFAULT NULL,
   `address` varchar(300) DEFAULT NULL,
   `city` varchar(50) DEFAULT NULL,
@@ -127,8 +128,9 @@ CREATE TABLE `users` (
   `activated` tinyint(1) NOT NULL DEFAULT '0',
   `activation_code_digest` varchar(255) NOT NULL,
   `remember_digest` varchar(255) DEFAULT NULL,
-  PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=latin1;
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `email` (`email`)
+) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -137,7 +139,7 @@ CREATE TABLE `users` (
 
 LOCK TABLES `users` WRITE;
 /*!40000 ALTER TABLE `users` DISABLE KEYS */;
-INSERT INTO `users` VALUES (4,'Drew Pereli','drewpereli@gmail.com',NULL,NULL,'City town',NULL,NULL,NULL,'$2y$10$..GzvBcXQM8DychqkNIphewKcnXdzqR1ydUy5BQwp5fo7wbSWWR6y',1,'$2y$10$0rGvqOhPc.AE5Xx1ASHYn.HAxLRPzC/TGbzbs/pSllZgStt9DbNtO','$2y$10$MDlfeLA23Bld2O5nD/wNK.EvUlCtexEW4x9Z.VtSD/Lvjmo/iqgHi');
+INSERT INTO `users` VALUES (6,'Drew Pereli','drewpereli@gmail.com',NULL,NULL,NULL,NULL,NULL,NULL,'$2y$10$wnUQcYNmrMy4tk8tMWjJ2.iPzoedmjl5Up.OQrOkyXb056PhdvaOO',1,'$2y$10$kkjeVwtf.CoElXJPdqO.GedQXEOIuyvCJnS5ZMs6RuskGiZF8aMSm','$2y$10$InYLJzV9mE8nSbDHe2MvVe8lKb447J8oE88to3/cLOOhM9iIHsmQ6');
 /*!40000 ALTER TABLE `users` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
@@ -150,4 +152,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2016-12-26 20:52:04
+-- Dump completed on 2017-01-12  4:19:52

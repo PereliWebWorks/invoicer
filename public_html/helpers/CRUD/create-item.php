@@ -9,7 +9,22 @@
 	}
 	$item_info = $_POST["item"];
 	unset($_POST["item"]);
-	$item_info["duration"] = intval($item_info["duration"]);
+	if (!empty($item_info["duration"]))
+	{
+		$item_info["duration"] = intval($item_info["duration"]);
+	}
+	else
+	{
+		unset($item_info["duration"]);
+	}
+	if (!empty($item_info["cost"]))
+	{
+		$item_info["cost"] *= 100;
+	}
+	else
+	{
+		unset($item_info["cost"]);
+	}
 	$item = new Item($item_info);
 	$attempt = $item->save();
 	if (!$attempt->success)

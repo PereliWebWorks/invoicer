@@ -23,12 +23,23 @@
 					$d = 0;
 					foreach ($this->items as $item)
 					{
-						$d += intval($item->duration);
+						$d += $item->duration_in_hours;
 					}
-					$d /= 60;
 					return $d;
 				case "cost":
-					return $this->duration_in_hours * $this->client->rate_in_dollars;
+					$c = 0;
+					foreach ($this->items as $item)
+					{
+						$c += intval($item->cost);
+					}
+					return $c;
+				case "cost_in_dollars":
+					$c = 0;
+					foreach ($this->items as $item)
+					{
+						$c += $item->cost_in_dollars;
+					}
+					return $c;
 				case "slug":
 					$invoice_id = $this->id;
 					$client_id = $this->client->id;
