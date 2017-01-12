@@ -318,7 +318,8 @@
 			if (array_key_exists($field, $this->data)) {
 	            return $this->data[$field];
 	        }
-	        throw new Error("Invalid property: $field.");
+	        return null;
+	        //throw new Error("Invalid property: $field.");
 		}
 		function __isset($field)
 		{

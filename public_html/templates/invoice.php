@@ -15,22 +15,21 @@
 			<div class="col-xs-12">&nbsp;</div>
 			<div class="client-info col-xs-4">
 				<div class="col-xs-12"><i>To:</i></div>
-				<div class="col-xs-12"><?= $this->client->name; ?></div>
-				<?php if (!empty($this->client->company)) : ?>
-					<div class="col-xs-12"><?= $this->client->company; ?></div>
-				<?php endif ?>
-				<div class="col-xs-12"><?= $this->client->email; ?></div>
-				<?php if (!empty($this->client->phone)) : ?>
-					<div class="col-xs-12"><?= $this->client->phone; ?></div>
-				<?php endif ?>
+				<?php
+					$renderer_current_client = $this->client;
+					$this->prepare_template("contact_info");
+					$this->user = $renderer_current_client;
+					unset($renderer_current_client);
+					$this->render();
+				?>
 			</div>
 			<div class="user-info col-xs-4 col-xs-offset-4">
 				<div class="col-xs-12"><i>From:</i></div>
-				<div class="col-xs-12"><?= $this->user->name; ?></div>
-				<div class="col-xs-12"><?= $this->user->email; ?></div>
-				<?php if (!empty($this->user->phone)) : ?>
-					<div class="col-xs-12"><?= $this->user->phone; ?></div>
-				<?php endif ?>
+				<?php
+					$this->prepare_template("contact_info");
+					$this->user = getCurrentUser();
+					$this->render();
+				?>
 			</div>
 			<div class="col-xs-12">&nbsp;</div>
 			<div class="col-xs-12 rate-container">

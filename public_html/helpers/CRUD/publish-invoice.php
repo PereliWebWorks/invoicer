@@ -32,9 +32,11 @@
 	$renderer->invoice = $invoice;
 	$file = fopen($htmlPath, "w");
 	fwrite($file, "<html>");
-	fwrite($file, $renderer->render_string('../helpers/head'));
+	$renderer->prepare_template('../helpers/head');
+	fwrite($file, $renderer->render_string());
 	fwrite($file, "<body>");
-	fwrite($file, $renderer->render_string('invoice'));
+	$renderer->prepare_template('invoice');
+	fwrite($file, $renderer->render_string());
 	fwrite($file, "</body></html>");
 	fclose($file);
 	chmod($htmlPath, 0400);

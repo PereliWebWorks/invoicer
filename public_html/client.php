@@ -124,8 +124,9 @@
 			<div class="col-xs-12">&nbsp;</div>
 			<div class="col-xs-12 invoice-container">
 			<?php 
+				$renderer->prepare_template("invoice");
 				$renderer->invoice = $current_invoice; 
-				$renderer->render("invoice");
+				$renderer->render();
 			?>
 			</div>
 		</div>
@@ -186,8 +187,9 @@
 				<div class="col-xs-12">&nbsp;</div>
 				<div class="col-xs-12 invoice-container">
 				<?php
+					$renderer->prepare_template("invoice");
 					$renderer->invoice = $invoice; 
-					$renderer->render("invoice");
+					$renderer->render();
 				?>
 				</div>
 				<div class="col-xs-12">&nbsp;</div>

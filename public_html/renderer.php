@@ -1,32 +1,61 @@
 <?php
 	class Renderer{
-		private $template_dir = __DIR__ . "/templates/";
+		const TEMPLATE_DIR = __DIR__ . "/templates/";
 		private $data = array();
-		public function render($template_file) {
-			$template_file .= ".php";
-	        if (file_exists($this->template_dir.$template_file)) {
-	            include $this->template_dir.$template_file;
+		public function render() {
+			$file_names = array_keys($this->data);
+			$last_key = end($file_names); 
+			$template_file = $last_key;
+	        if (file_exists(static::TEMPLATE_DIR.$template_file)) {
+	            include static::TEMPLATE_DIR.$template_file;
+	            array_pop($this->data);
 	        } else {
-	            throw new Exception('No template file ' . $template_file . ' present in directory ' . $this->template_dir);
+	            throw new Exception('No template file ' . $template_file . ' present in directory ' . static::TEMPLATE_DIR);
 	        }
 	    }
-	    public function render_string($template_file) {
-	    	$template_file .= ".php";
-	        if (file_exists($this->template_dir.$template_file)) {
-	        	$filename = $this->template_dir.$template_file;
+	    public function render_string() {
+	    	$file_names = array_keys($this->data);
+			$last_key = end($file_names); 
+			$template_file = $last_key . ".php";
+	        if (file_exists(static::TEMPLATE_DIR.$template_file)) {
+	        	$filename = static::TEMPLATE_DIR.$template_file;
 	        	ob_start();
         		include $filename;
+        		array_pop($this->data);
         		$contents = ob_get_clean();
 	            return $contents;
 	        } else {
-	            throw new Exception('No template file ' . $template_file . ' present in directory ' . $this->template_dir);
+	            throw new Exception('No template file ' . $template_file . ' present in directory ' . static::TEMPLATE_DIR);
+	        }
+	    }
+	    function prepare_template($template_file)
+	    {
+	    	$template_file .= ".php";
+	        if (file_exists(static::TEMPLATE_DIR.$template_file)) {
+	            $this->data[$template_file] = array();
+	        } else {
+	            throw new Exception('No template file ' . $template_file . ' present in directory ' . static::TEMPLATE_DIR);
 	        }
 	    }
 	    public function __set($name, $value) {
-        	$this->data[$name] = $value;
+	    	if (sizeof($this->data) === 0)
+	    	{
+	    		throw new Exception("No template prepared.");
+	    		return;
+	    	}
+	    	$file_names = array_keys($this->data);
+			$last_key = end($file_names); 
+        	$this->data[$last_key][$name] = $value;
    		}
     	public function __get($name) {
-        	return $this->data[$name];
+    		if (sizeof($this->data) === 0)
+	    	{
+	    		throw new Exception("No template prepared.");
+	    		return;
+	    	}
+	    	$file_names = array_keys($this->data);
+			$last_key = end($file_names); 
+        	return $this->data[$last_key][$name];
     	}
 	}
 	$renderer = new Renderer();
