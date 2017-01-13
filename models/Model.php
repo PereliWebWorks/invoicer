@@ -6,7 +6,7 @@
 		protected static $immutable_fields = array();
 		protected static $unsettable_fields = array(); //Fields that shouldn't be set at creation
 		public static $columns;
-		const DB_NAME = "invoicer";
+		const DB_NAME = "invoicer_db";
 		//Returns whether the object as it stands is valid to save.
 		//The base-class function will make sure all required fields are present in $this->data.
 		public function isValid()
@@ -142,6 +142,11 @@
 			}
 			return $return_array;
 			
+		}
+		public static function findFirstBy($field, $value)
+		{
+			$results = static::findBy($field, $value);
+			return sizeof($results) > 0 ? $results[0] : false;
 		}
 		public static function findWhere($condition)
 		{

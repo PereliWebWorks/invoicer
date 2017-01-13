@@ -18,7 +18,7 @@
 ?>
 <div>Don't have an account yet? <a href="sign-up.php">Sign Up!</a></div>
 <div id="response" class="hidden message">
-
+<?php require_once("helpers/global-html-foot.php"); ?>
 <script>
 	$("#log-in_submit_btn").click(function(){
 		var valid_input = validateRequiredFields("log-in_form");
@@ -38,7 +38,8 @@
 			}).done(function(data)
 			{
 				data = $.trim(data);
-				if (data === "SUCCESS")
+				data = $.parseJSON(data);
+				if (data.success)
 				{
 					//Redirect to index
 					window.location.replace("index.php");
@@ -47,7 +48,7 @@
 				{
 					$("#response").removeClass("hidden")
 						.addClass("bg-danger text-danger")
-						.html(data);
+						.html(data.message);
 				}
 			});
 		}
