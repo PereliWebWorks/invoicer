@@ -107,6 +107,23 @@ INSERT INTO `items` VALUES (26,14,'asdfdsa',1, null),(27,16,'Loving Drew',1000, 
 /*!40000 ALTER TABLE `items` ENABLE KEYS */;
 UNLOCK TABLES;
 
+
+
+--
+-- Table structure for table `to_do_items`
+--
+DROP TABLE IF EXISTS `to_do_items`;
+CREATE TABLE `to_do_items` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `client_id` int(11) NOT NULL,
+  `description` varchar(1000) NOT NULL,
+  `urgency` int(1) NOT NULL DEFAULT 1,
+  `finished` tinyint(1) NOT NULL DEFAULT '0',
+  PRIMARY KEY (`id`),
+  KEY `client_id` (`client_id`),
+  CONSTRAINT `to_do_items_ibfk_1` FOREIGN KEY (`client_id`) REFERENCES `clients` (`id`) ON DELETE CASCADE
+);
+
 --
 -- Table structure for table `users`
 --

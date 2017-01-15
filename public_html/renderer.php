@@ -16,7 +16,7 @@
 	    public function render_string() {
 	    	$file_names = array_keys($this->data);
 			$last_key = end($file_names); 
-			$template_file = $last_key . ".php";
+			$template_file = $last_key;
 	        if (file_exists(static::TEMPLATE_DIR.$template_file)) {
 	        	$filename = static::TEMPLATE_DIR.$template_file;
 	        	ob_start();

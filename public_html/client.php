@@ -22,6 +22,9 @@
 	$rate = $client->default_rate;
 	//Get the invoice items
 	$items = $current_invoice->items;
+	$to_do_items = $client->to_do_items;
+	$unfnished_items = To_Do_Item::findWhere("client_id={$client->id} AND finished=0");
+	$fnished_items = To_Do_Item::findWhere("client_id={$client->id} AND finished=1");
 ?>
 <?php require_once("helpers/global-html-head.php"); ?>
 	<!-- CLIENT INFO -->
@@ -32,6 +35,156 @@
 	</div>
 	<!-- END CLIENT INFO -->
 	<hr/>
+	<h2 id="to-do">To Do</h2>
+	<div class="row item_form-container">
+		<h3>Add To-Do Items</h3>
+		<form id="to_do_item_form">
+			<div class="form-group">
+				<label for="to_do_item_description">Item</label>
+				<input type="text" 
+						name="to_do_item[description]"
+						id="to_do_item_description"
+						class="form-control required" />
+			</div>
+			<input type="hidden" name="to_do_item[client_id]" value="<?= $client->id; ?>" />
+			<div class="form-group">
+				<label>&nbsp;</label><br/>
+				<div id="to_do_item-submit_btn" class="btn btn-default">Add Item</div>
+			</div>
+		</form>
+		<div id="to_do_item_response" class="hidden message col-xs-6 col-xs-offset-3"></div>
+			<script>
+				$("#to_do_item-submit_btn").click(function(){
+					var valid_input = validateRequiredFields("to_do_item_form");
+					var message = valid_input ? "" : "Missing required fields";
+					//Should validate number field
+					if (valid_input)
+					{
+						$("#to_do_item_response").removeClass("hidden")
+							.removeClass("bg-danger")
+							.removeClass("text-danger")
+							.addClass("bg-success text-success")
+							.html("Processing...");
+						var json = $("#to_do_item_form").serializeJSON();
+						$.ajax({
+							type: "POST",
+							url: "create-to_do_item.php",
+							data: json,
+						}).done(function(data){
+							data = $.trim(data);
+							data = $.parseJSON(data);
+							if (data["success"])
+							{
+								$("#to_do_item_response").html("Item added.");
+								window.location.reload();
+							}
+							else
+							{
+								$("#to_do_item_response").removeClass("bg-success text-success")
+									.addClass("bg-danger text-danger")
+									.html(data["message"]);
+							}
+						});
+					}
+					else
+					{
+						$("#to_do_item_response").removeClass("hidden")
+							.addClass("bg-danger text-danger")
+							.html(message);
+					}
+				});
+			</script>
+	</div>
+	<div class="to-do-items">
+		<h4>Unfinished Items</h4>
+		<div class="unfinished-items row">
+			<table class="table table-responsive">
+				<?php foreach($unfnished_items as $to_do_item) : ?>
+					<tr id="to_do_item-<?= $to_do_item->id; ?>">
+						<td>
+							<?= $to_do_item->description; ?>
+						</td>
+						<td class="btn btn-default mark-as-finished-btn">
+						Mark as finished
+						</td>
+						<td class="btn btn-danger remove-btn">
+						Remove
+						</td>
+					</tr>
+				<?php endforeach ?>
+			</table>
+		</div>
+		<h4>Finished Items</h4>
+		<div class="unfinished-items row">
+			<table class="table table-responsive">
+				<?php foreach($fnished_items as $to_do_item) : ?>
+					<tr id="to_do_item-<?= $to_do_item->id; ?>">
+						<td>
+							<?= $to_do_item->description; ?>
+						</td>
+						<td class="btn btn-danger remove-btn">
+						Remove
+						</td>
+					</tr>
+				<?php endforeach ?>
+			</table>
+		</div>
+	</div>
+	<script>
+		$(".to-do-items .mark-as-finished-btn").on("click", function()
+			{
+				var id = $(this).parent().attr("id").split("-")[1];
+				var data = {
+					model: "To_Do_Item",
+					id: id,
+					finished: 1
+				};
+				$.ajax({
+					type: "POST",
+					data: data,
+					url: "helpers/CRUD/update.php"
+				}).done(function(response)
+				{
+					response = $.trim(response);
+					response = $.parseJSON(response);
+					if (response.success)
+					{
+						window.location.reload();
+					}
+					else
+					{
+						console.log(response.message);
+					}
+				});
+			});
+
+		$(".to-do-items .remove-btn").on("click", function()
+			{
+				var id = $(this).parent().attr("id").split("-")[1];
+				var data = {
+					model: "To_Do_Item",
+					id: id,
+					finished: 1
+				};
+				$.ajax({
+					type: "POST",
+					data: data,
+					url: "helpers/CRUD/destroy.php"
+				}).done(function(response)
+				{
+					response = $.trim(response);
+					response = $.parseJSON(response);
+					if (response.success)
+					{
+						window.location.reload();
+					}
+					else
+					{
+						console.log(response.message);
+					}
+				});
+			});
+	</script>
 	<!-- ITEM FORM -->
 	<div class="row item_form-container">
 		<h3 class="col-xs-12">Add Invoice Item</h3>
@@ -62,7 +215,7 @@
 				<div type="" id="item_submit-btn" class="btn btn-default">Add Item</div>
 			</div>
 		</form>
-		<div id="response" class="hidden message col-xs-6 col-xs-offset-3"></div>
+		<div id="item_response" class="hidden message col-xs-6 col-xs-offset-3"></div>
 		<script>
 			$("#item_submit-btn").click(function(){
 				var valid_input = validateRequiredFields("item_form");
@@ -70,7 +223,7 @@
 				//Should validate number field
 				if (valid_input)
 				{
-					$("#response").removeClass("hidden")
+					$("#item_response").removeClass("hidden")
 						.removeClass("bg-danger")
 						.removeClass("text-danger")
 						.addClass("bg-success text-success")
@@ -85,12 +238,12 @@
 						data = $.parseJSON(data);
 						if (data["success"])
 						{
-							$("#response").html("Item added.");
+							$("#item_response").html("Item added.");
 							window.location.reload(true);
 						}
 						else
 						{
-							$("#response").removeClass("bg-success text-success")
+							$("#item_response").removeClass("bg-success text-success")
 								.addClass("bg-danger text-danger")
 								.html(data["message"]);
 						}
@@ -98,7 +251,7 @@
 				}
 				else
 				{
-					$("#response").removeClass("hidden")
+					$("#item_response").removeClass("hidden")
 						.addClass("bg-danger text-danger")
 						.html(message);
 				}
@@ -113,7 +266,7 @@
 	<!-- CURRENT INVOICE -->
 	<div class="row">
 		<div class="col-xs-12 col-sm-8 col-sm-offset-2">
-			<input type="button" class="btn btn-success col-xs-2" id="publish-btn" value="Publish and Send" />
+			<input type="button" class="btn btn-success col-xs-2" id="publish-and-send-btn" value="Publish and Send" />
 			<div class="col-xs-1"></div>
 			<a href="preview-invoice.php?i=<?= $current_invoice->id; ?>"
 				class="col-xs-2 btn btn-default"
@@ -132,7 +285,7 @@
 		</div>
 	</div>
 		<script>
-			$("#publish-btn").click(function(){
+			$("#publish-and-send-btn").click(function(){
 				$("#publish-response").removeClass("bg-danger text-danger")
 					.addClass("bg-success text-success")
 					.html("Processing...")
@@ -141,7 +294,7 @@
 							invoice: 
 							{
 								id: <?= $current_invoice->id; ?>,
-								status: 1
+								status: 0
 							}
 						};
 				$.ajax({
@@ -155,13 +308,29 @@
 					if (data.success)
 					{
 						$.ajax({
-							type: "POST",
-							url: "helpers/CRUD/create-invoice.php",
-							data: {invoice: {client_id: <?= $client->id; ?>}}
-						}).done(function(data)
-						{
-							window.location.reload();
-						});
+								type: "POST",
+								url: "helpers/send-invoice.php",
+								data: {invoice: {id: <?= $current_invoice->id; ?>}}
+							}).done(function(data)
+							{
+								data = $.trim(data);
+								data = $.parseJSON(data);
+								if (data.success)
+								{
+									$.ajax({
+										type: "POST",
+										url: "helpers/CRUD/create-invoice.php",
+										data: {invoice: {client_id: <?= $client->id; ?>}}
+									}).done(function()
+									{
+										window.location.reload();
+									});
+								}
+								else
+								{
+									console.log(data.message);
+								}
+							});
 					}
 					else
 					{

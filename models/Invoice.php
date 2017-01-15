@@ -10,6 +10,8 @@
 			{
 				case "client":
 					return Client::find($this->client_id);
+				case "user":
+					return $this->client->user;
 				case "items":
 					return Item::findBy("invoice_id", $this->id);
 				case "duration":

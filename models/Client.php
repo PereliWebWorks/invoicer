@@ -68,6 +68,8 @@
 					return User::find($this->user_id);
 				case "rate_in_dollars_per_hour":
 					return $this->default_rate / 100;
+				case "to_do_items":
+					return To_Do_Item::findBy("client_id", $this->id);
 				default:
 					return parent::__get($name);
 			}
