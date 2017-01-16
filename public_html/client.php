@@ -267,8 +267,8 @@
 	<div class="row">
 		<div id="current-invoice" class="col-xs-12 col-sm-8 col-sm-offset-2">
 			<input type="button" class="btn btn-success col-xs-2" data-action="publish_and_send" value="Publish and Send" />
-			<input type="button" class="btn btn-success col-xs-2 col-xs-offset-1" data-action="publish" value="Publish and Send" />
-			<input type="button" class="btn btn-success col-xs-2 col-xs-offset-1" data-action="send" value="Publish and Send" />
+			<input type="button" class="btn btn-success col-xs-2 col-xs-offset-1" data-action="publish" value="Publish" />
+			<input type="button" class="btn btn-success col-xs-2 col-xs-offset-1" data-action="send" value="Send" />
 			<div class="col-xs-1"></div>
 			<a href="preview-invoice.php?i=<?= $current_invoice->id; ?>"
 				class="col-xs-2 btn btn-default"
@@ -287,62 +287,121 @@
 		</div>
 	</div>
 		<script>
-			$("#current-invoice btn").click(function(){
+			$("#current-invoice .btn").click(function(){
 				$("#publish-response").removeClass("bg-danger text-danger")
 					.addClass("bg-success text-success")
 					.html("Processing...")
-				var data = 
-						{
-							invoice: 
-							{
-								id: <?= $current_invoice->id; ?>,
-								status: 1
-							}
-						};
-				$.ajax({
-					type: "POST",
-					url: "helpers/CRUD/update-invoice.php",
-					data: data
-				}).done(function(data)
+				var action = $(this).data("action");
+				var firstURL;
+				var id = <?= $current_invoice->id; ?>;
+				if (action === "publish_and_send")
 				{
-					data = $.trim(data);
-					data = $.parseJSON(data);
-					if (data.success)
-					{
-						$.ajax({
-								type: "POST",
-								url: "helpers/send-invoice.php",
-								data: {invoice: {id: <?= $current_invoice->id; ?>}}
-							}).done(function(data)
+					var data = 
 							{
-								data = $.trim(data);
-								data = $.parseJSON(data);
-								if (data.success)
-								{
-									$.ajax({
-										type: "POST",
-										url: "helpers/CRUD/create-invoice.php",
-										data: {invoice: {client_id: <?= $client->id; ?>}}
-									}).done(function()
-									{
-										window.location.reload();
-									});
-								}
-								else
-								{
-									$("#publish-response").removeClass("bg-success text-success")
-										.addClass("bg-danger text-danger")
-										.html(data.message);
-								}
-							});
-					}
-					else
+								model: "Invoice",
+								id: id,
+								status: 1 
+							};
+					$.ajax({
+						type: "POST",
+						url: "helpers/CRUD/update.php",
+						data: data
+					}).done(function(response)
 					{
-						$("#publish-response").removeClass("bg-success text-success")
-							.addClass("bg-danger text-danger")
-							.html(data.message);
+						response = $.trim(response);
+						response = $.parseJSON(response);
+						if (response.success)
+						{
+							$.ajax({
+									type: "POST",
+									url: "helpers/send-invoice.php",
+									data: {invoice: {id: <?= $current_invoice->id; ?>}}
+								}).done(function(response)
+								{
+									response = $.trim(response);
+									response = $.parseJSON(response);
+									if (response.success)
+									{
+										$.ajax({
+											type: "POST",
+											url: "helpers/CRUD/create-invoice.php",
+											data: {invoice: {client_id: <?= $client->id; ?>}}
+										}).done(function()
+										{
+											window.location.reload();
+										});
+									}
+									else
+									{
+										$("#publish-response").removeClass("bg-success text-success")
+											.addClass("bg-danger text-danger")
+											.html(response.message);
+									}
+								});
+						}
+						else
+						{
+							$("#publish-response").removeClass("bg-success text-success")
+								.addClass("bg-danger text-danger")
+								.html(response.message);
+						}
+					});
+				}
+				else if (action === "publish")
+				{
+					var data = {
+						model: "Invoice",
+						id: id,
+						status: 1
 					}
-				});
+					$.ajax({
+						type: "POST",
+						url: "helpers/CRUD/update.php",
+						data: data
+					}).done(function(response){
+						response = $.trim(response);
+						response = $.parseJSON(response);
+						if (response.success)
+						{
+							$.ajax({
+								type: "POST",
+								url: "helpers/CRUD/create-invoice.php",
+								data: {invoice: {client_id: <?= $client->id; ?>}}
+							}).done(function()
+							{
+								window.location.reload();
+							});
+						}
+						else
+						{
+							$("#publish-response").removeClass("bg-success text-success")
+								.addClass("bg-danger text-danger")
+								.html(response.message);
+						}
+					});
+				}
+				else if (action === "send")
+				{
+					$.ajax({
+						type: "POST",
+						url: "helpers/send-invoice.php",
+						data: {invoice: {id: <?= $current_invoice->id; ?>}}
+					}).done(function(response)
+					{
+						response = $.trim(response);
+						response = $.parseJSON(response);
+						if (response.success)
+						{
+							window.location.reload();
+						}
+						else
+						{
+							$("#publish-response").removeClass("bg-success text-success")
+								.addClass("bg-danger text-danger")
+								.html(response.message);
+						}
+					});
+				}
 			})
 		</script>
 		<hr/>
