@@ -31,7 +31,7 @@
 		    </div>
 		</div>
 	</nav>
-	<script>
+	<script type="text/javascript">
 		$("#log-out-btn").click(function(){
 			$.ajax({
 				url: "helpers/CRUD/destroy-session.php"

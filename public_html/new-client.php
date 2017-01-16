@@ -17,7 +17,7 @@
 	generateForm($form_fields, "new-client");
 ?>
 <div id="response" class="message hidden"></div>
-<script>
+<script type="text/javascript">
 	$("#new-client_submit_btn").click(function(){
 		var valid_input = validateRequiredFields("new-client_form");
 		var message = valid_input ? "" : "Missing required fields";

@@ -53,7 +53,7 @@
 			</div>
 		</form>
 		<div id="to_do_item_response" class="hidden message col-xs-6 col-xs-offset-3"></div>
-			<script>
+			<script type="text/javascript">
 				$("#to_do_item-submit_btn").click(function(){
 					var valid_input = validateRequiredFields("to_do_item_form");
 					var message = valid_input ? "" : "Missing required fields";
@@ -130,7 +130,7 @@
 			</table>
 		</div>
 	</div>
-	<script>
+	<script type="text/javascript">
 		$(".to-do-items .mark-as-finished-btn").on("click", function()
 			{
 				var id = $(this).parent().attr("id").split("-")[1];
@@ -216,7 +216,7 @@
 			</div>
 		</form>
 		<div id="item_response" class="hidden message col-xs-6 col-xs-offset-3"></div>
-		<script>
+		<script type="text/javascript">
 			$("#item_submit-btn").click(function(){
 				var valid_input = validateRequiredFields("item_form");
 				var message = valid_input ? "" : "Missing required fields";
@@ -286,7 +286,7 @@
 			</div>
 		</div>
 	</div>
-		<script>
+		<script type="text/javascript">
 			$("#current-invoice .btn").click(function(){
 				$("#publish-response").removeClass("bg-danger text-danger")
 					.addClass("bg-success text-success")
@@ -437,7 +437,7 @@
 			<?php endforeach ?>
 		</div>
 	</div>
-	<script>
+	<script type="text/javascript">
 	$("#pending-invoices .btn").click(function(){
 		var id = $(this).data("invoice-id");
 		var action = $(this).data("action");

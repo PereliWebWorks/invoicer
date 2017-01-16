@@ -13,7 +13,7 @@
 	<div>Already a user? <a href="log-in.php">Log In</a></div>
 	<div id="response" class="hidden message">
 	</div>
-	<script>
+	<script type="text/javascript">
 		$("#new-user_submit_btn").click(function(){
 			//validate data
 			var valid_input = validateRequiredFields("new-user_form");

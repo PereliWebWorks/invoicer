@@ -19,7 +19,7 @@
 <div>Don't have an account yet? <a href="sign-up.php">Sign Up!</a></div>
 <div id="response" class="hidden message">
 <?php require_once("helpers/global-html-foot.php"); ?>
-<script>
+<script type="text/javascript">
 	$("#log-in_submit_btn").click(function(){
 		var valid_input = validateRequiredFields("log-in_form");
 		var message = valid_input ? "" : "Missing required fields";
