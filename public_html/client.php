@@ -37,9 +37,9 @@
 	<hr/>
 	<h2 id="to-do">To Do</h2>
 	<div class="row item_form-container">
-		<h3>Add To-Do Items</h3>
+		<h3 class="col-xs-12">Add To-Do Items</h3>
 		<form id="to_do_item_form">
-			<div class="form-group">
+			<div class="form-group col-xs-10">
 				<label for="to_do_item_description">Item</label>
 				<input type="text" 
 						name="to_do_item[description]"
@@ -47,7 +47,7 @@
 						class="form-control required" />
 			</div>
 			<input type="hidden" name="to_do_item[client_id]" value="<?= $client->id; ?>" />
-			<div class="form-group">
+			<div class="form-group col-xs-2">
 				<label>&nbsp;</label><br/>
 				<div id="to_do_item-submit_btn" class="btn btn-default">Add Item</div>
 			</div>
@@ -68,7 +68,7 @@
 						var json = $("#to_do_item_form").serializeJSON();
 						$.ajax({
 							type: "POST",
-							url: "create-to_do_item.php",
+							url: "helpers/CRUD/create-to_do_item.php",
 							data: json,
 						}).done(function(data){
 							data = $.trim(data);
@@ -265,8 +265,10 @@
 	******************-->
 	<!-- CURRENT INVOICE -->
 	<div class="row">
-		<div class="col-xs-12 col-sm-8 col-sm-offset-2">
-			<input type="button" class="btn btn-success col-xs-2" id="publish-and-send-btn" value="Publish and Send" />
+		<div id="current-invoice" class="col-xs-12 col-sm-8 col-sm-offset-2">
+			<input type="button" class="btn btn-success col-xs-2" data-action="publish_and_send" value="Publish and Send" />
+			<input type="button" class="btn btn-success col-xs-2 col-xs-offset-1" data-action="publish" value="Publish and Send" />
+			<input type="button" class="btn btn-success col-xs-2 col-xs-offset-1" data-action="send" value="Publish and Send" />
 			<div class="col-xs-1"></div>
 			<a href="preview-invoice.php?i=<?= $current_invoice->id; ?>"
 				class="col-xs-2 btn btn-default"
@@ -285,7 +287,7 @@
 		</div>
 	</div>
 		<script>
-			$("#publish-and-send-btn").click(function(){
+			$("#current-invoice btn").click(function(){
 				$("#publish-response").removeClass("bg-danger text-danger")
 					.addClass("bg-success text-success")
 					.html("Processing...")
@@ -294,7 +296,7 @@
 							invoice: 
 							{
 								id: <?= $current_invoice->id; ?>,
-								status: 0
+								status: 1
 							}
 						};
 				$.ajax({
@@ -328,7 +330,9 @@
 								}
 								else
 								{
-									console.log(data.message);
+									$("#publish-response").removeClass("bg-success text-success")
+										.addClass("bg-danger text-danger")
+										.html(data.message);
 								}
 							});
 					}
@@ -345,13 +349,21 @@
 	<!-- END CURRENT INVOICE -->
 	<!-- PENDING INVOICES -->
 	<div class="row">
-		<div class="col-xs-12 col-sm-8 col-sm-offset-2">
+		<div class="col-xs-12 col-sm-8 col-sm-offset-2" id="pending-invoices">
 			<h3>Pending Invoices</h3>
 			<?php foreach($client->getInvoices("PENDING") as $invoice) : ?>
 				<div class="col-xs-12">&nbsp;</div>
 				<div class="col-xs-12">&nbsp;</div>
 				<div class="col-xs-12">
-					<div class="btn btn-success" id="mark-as-paid-btn_<?= $invoice->id; ?>">Mark as Paid</div>
+					<div class="btn btn-success col-xs-2" 
+							data-invoice-id="<?= $invoice->id; ?>"
+							data-action="mark-as-paid">Mark as Paid</div>
+					<div class="btn btn-default col-xs-2 col-xs-offset-1" 
+							data-invoice-id="<?= $invoice->id; ?>"
+							data-action="send">Send to Client</div>
+					<div class="btn btn-danger col-xs-2 col-xs-offset-1" 
+							data-invoice-id="<?= $invoice->id; ?>"
+							data-action="delete">Delete</div>
 				</div>
 				<div class="col-xs-12">&nbsp;</div>
 				<div class="col-xs-12 invoice-container">
@@ -366,7 +378,90 @@
 			<?php endforeach ?>
 		</div>
 	</div>
-	<!-- END PENDING INVOICES
+	<script>
+	$("#pending-invoices .btn").click(function(){
+		var id = $(this).data("invoice-id");
+		var action = $(this).data("action");
+		var data;
+		var url;
+		if (action === "mark-as-paid")
+		{
+			data = {
+				model: "Invoice",
+				id: id,
+				status: 2
+			}
+			url = "helpers/CRUD/update.php";
+		}
+		else if (action === "send")
+		{
+			data = {
+				invoice: {
+					id: id
+				}
+			}
+			url = "helpers/send-invoice.php";
+		}
+		else if (action === "delete")
+		{
+			data = {
+				model: "Invoice",
+				id: id
+			}
+			url = "helpers/CRUD/destroy.php";
+		}
+		else
+		{
+			console.log("There was an error");
+			return false;
+		}
+		console.log(data);
+		$.ajax({
+			type: "POST",
+			url: url,
+			data: data
+		}).done(function(response){
+			response = $.trim(response);
+			response = $.parseJSON(response);
+			if (response.success)
+			{
+				window.location.reload();
+			}
+			else
+			{
+				console.log(response.message);
+			}
+		});
+	});
+	</script>
+	<!-- END PENDING INVOICES -->
+	<hr/>
+	<!-- PAID INVOICES -->
+	<div class="row">
+		<div class="col-xs-12 col-sm-8 col-sm-offset-2">
+		<h3>Paid Invoices (receipts)</h3>
+		<?php foreach($client->getInvoices("PAID") as $invoice) : ?>
+			<div class="col-xs-12">&nbsp;</div>
+			<div class="col-xs-12">&nbsp;</div>
+			<div class="col-xs-12">
+				<div class="btn btn-default col-xs-2" id="send-receipt-btn_<?= $invoice->id; ?>">Send to Client</div>
+				<div class="btn btn-warning col-xs-2 col-xs-offset-1" id="mark-as-pending-btn_<?= $invoice->id; ?>">Mark as pending</div>
+				<div class="btn btn-danger col-xs-2 col-xs-offset-1" id="delete-receipt-btn_<?= $invoice->id; ?>">Delete</div>
+			</div>
+			<div class="col-xs-12">&nbsp;</div>
+			<div class="col-xs-12 invoice-container">
+			<?php
+				$renderer->prepare_template("invoice");
+				$renderer->invoice = $invoice; 
+				$renderer->render();
+			?>
+			</div>
+			<div class="col-xs-12">&nbsp;</div>
+			<div class="col-xs-12">&nbsp;</div>
+		<?php endforeach ?>
+		</div>
+	</div>
+	<!-- END PAID INVOICES -->
 	
 <?php require_once("helpers/global-html-foot.php"); ?>
 
