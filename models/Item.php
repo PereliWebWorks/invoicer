@@ -50,6 +50,8 @@
 						return $this->duration_in_hours * $this->invoice->client->rate_in_dollars_per_hour;
 					}
 					return null;
+				case "user":
+					return $this->invoice->user;
 				default:
 					return parent::__get($name);
 			}

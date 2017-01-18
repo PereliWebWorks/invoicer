@@ -65,6 +65,18 @@
 			$r->success = true;
 			return $r;
 		}
+
+		function __construct($args = null)
+		{
+			$activation_code = md5(rand());
+			$this->data["activation_code_digest"] = password_hash($activation_code, PASSWORD_DEFAULT);
+			$pwd = $args["password"];
+			if ($pwd !== $args["password_confirmation"])
+			{
+				return false;
+			}
+			$this->data["password_digest"] = password_hash($new_user_info["password"], PASSWORD_DEFAULT);
+		}
 	}
 	User::init();
 ?>

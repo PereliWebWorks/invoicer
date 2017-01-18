@@ -6,6 +6,7 @@
 		protected static $immutable_fields = array();
 		protected static $unsettable_fields = array(); //Fields that shouldn't be set at creation
 		public static $columns;
+		protected static $require_owner_login = true;
 		const DB_NAME = "invoicer_db";
 		//Returns whether the object as it stands is valid to save.
 		//The base-class function will make sure all required fields are present in $this->data.
@@ -164,6 +165,11 @@
 		public function save()
 		{
 			$r = new Response();
+			if (static::$require_owner_login && $this->user != getCurrentUser())
+			{
+				$r->message("You don't have permission to alter this item.");
+				return $r;
+			}
 			$validator_response = static::isValid();
 			if (!$validator_response->success)
 			{
@@ -265,6 +271,11 @@
 		public function update($field, $value)
 		{
 			$r = new Response();
+			if (static::$require_owner_login && $this->user != getCurrentUser())
+			{
+				$r->message("You don't have permission to alter this item.");
+				return $r;
+			}
 			$r1 = static::fieldIsValid($field, $value);
 			if (!$r1->success){return $r1;}
 			$table = static::TABLE_NAME;
@@ -289,11 +300,20 @@
 
 		public function destroy()
 		{
+			$r = new Response();
+			if (static::$require_owner_login && $this->user != getCurrentUser())
+			{
+				$r->message("You don't have permission to alter this item.");
+				return $r;
+			}
 			$t = static::TABLE_NAME;
 			$q = "DELETE FROM $t WHERE id=:id";
 			$st = $GLOBALS['db']->prepare($q);
 			$st->bindParam(":id", $this->data['id']);
 			$st->execute();
+			$r->success = true;
+			$r->message = "Object destroyed";
+			return $r;
 		}
 
 		static function init()

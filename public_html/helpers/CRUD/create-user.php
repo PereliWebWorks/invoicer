@@ -8,21 +8,13 @@
 	}
 	$new_user_info = $_POST["new-user"];
 	unset($_POST);
-	if (empty($new_user_info['password']))
-	{
-		echo $r;
-		die();
-	}
-	$new_user_info["password_digest"] = password_hash($new_user_info["password"], PASSWORD_DEFAULT);
-	unset($new_user_info["password"]);
-	if (!password_verify($new_user_info["password-confirmation"], $new_user_info["password_digest"]))
-	{
-		echo $r;
-		die();
-	}
-	$activation_code = md5(rand());
-	$new_user_info["activation_code_digest"] = password_hash($activation_code, PASSWORD_DEFAULT);
+	
 	$new_user = new User($new_user_info);
+	if (!$new_user)
+	{
+		$r->fail("Bad user info.");
+		die();
+	}
 	$save_response = $new_user->save();
 	if (!$save_response->success)
 	{
