@@ -268,7 +268,14 @@
 		<div id="current-invoice" class="col-xs-12 col-sm-8 col-sm-offset-2">
 			<input type="button" class="btn btn-success col-xs-2" data-action="publish_and_send" value="Publish and Send" />
 			<input type="button" class="btn btn-success col-xs-2 col-xs-offset-1" data-action="publish" value="Publish" />
-			<input type="button" class="btn btn-success col-xs-2 col-xs-offset-1" data-action="send" value="Send" />
+			<input type="button" class="btn btn-success col-xs-2 col-xs-offset-1" 
+				data-action="send" 
+				data-recipient="client"
+				value="Send" />
+			<input type="button" class="btn btn-success col-xs-2 col-xs-offset-1" 
+				data-action="send" 
+				data-recipient="self"
+				value="Send to Self" />
 			<div class="col-xs-1"></div>
 			<a href="preview-invoice.php?i=<?= $current_invoice->id; ?>"
 				class="col-xs-2 btn btn-default"
@@ -385,7 +392,10 @@
 					$.ajax({
 						type: "POST",
 						url: "helpers/send-invoice.php",
-						data: {invoice: {id: <?= $current_invoice->id; ?>}}
+						data: {
+							invoice: {id: <?= $current_invoice->id; ?>},
+							to: $(this).data("recipient")
+						}
 					}).done(function(response)
 					{
 						response = $.trim(response);
