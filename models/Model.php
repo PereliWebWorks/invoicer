@@ -12,115 +12,10 @@
 				"update" => true,
 			);
 		const DB_NAME = "invoicer_db";
-		//Returns whether the object as it stands is valid to save.
-		//The base-class function will make sure all required fields are present in $this->data.
-		public function isValid()
-		{
-			$r = new Response();
-			foreach (static::$columns as $column)
-			{
-				//If the field is NOT NULL and it is not set
-				if ($column["Null"] === "NO" && !isset($this->data[$column["Field"]]))
-				{
-					//If there isn't a default value for the field, return false.
-					//If there is a default, or it's auto-incremented,
-					// everything is OK because the default will be set upon save.
-					if (!isset($column["Default"]) && $column["Extra"] !== "auto_increment")
-					{
-						$r->message = "Missing required column: {$column['Field']}.";
-						return $r;
-					}
-				}
-				if (isset($this->data[$column["Field"]])) //If the data isn't set, we know it's a not null field 
-				// and we don't have to validate it
-				{
-					$field_response = static::fieldIsValid($column["Field"], $this->data[$column["Field"]]);
-					if (!$field_response->success)
-					{
-						return $field_response;
-					}
-				}
-			}
-			$r->success = true;
-			return $r;
-		}
-		public function fieldIsValid($field, $value)
-		{
-			$r = new Response();
-			//Get the column info
-			$column = array_filter(static::$columns, function($c) use ($field){
-				return $c["Field"] === $field;
-			});
-			$column = end($column);
-			//If the column has a key constraint
-			if (!empty($column["Key"]))
-			{
-				//If it's a unique column, make sure the model is alright
-				if ($column["Key"] === "UNI")
-				{
-					$condition = "{$column['Field']} = '{$value}'";
-					if (!empty($this->data['id']))
-					{
-						$condition .= " AND id<>{$this->data['id']}";
-					}
-					$shouldntExist = static::findWhere($condition);
-					if (sizeof($shouldntExist) > 0)
-					{
-						$r->message = "Uniqueness constraint failed. COLUMN: $field | VALUE: $value. ";
-						return $r;
-					}
-				}
-				//If it's a foreign key, make sure a corresponding primary key of value $value exists.
-				if($column["Key"] === "MUL")
-				{
-					//Get referenced table and column name
-					$t_name = static::TABLE_NAME;
-					$c_name = $column["Field"];
-					$db_name = self::DB_NAME;
-					$info_pdo = new PDO('mysql:host=localhost;dbname=INFORMATION_SCHEMA', DB_USERNAME, DB_PASSWORD);
-					$q = "SELECT REFERENCED_TABLE_NAME, REFERENCED_COLUMN_NAME, TABLE_NAME, CONSTRAINT_NAME " 
-						. "FROM KEY_COLUMN_USAGE "
-						. "WHERE TABLE_NAME='{$t_name}' "
-						. "AND COLUMN_NAME='{$c_name}' "
-						. "AND REFERENCED_TABLE_NAME IS NOT NULL "
-						. "AND CONSTRAINT_SCHEMA='{$db_name}'";
-					$st = $info_pdo->prepare($q);
-					$st->execute();
-					$reference_info = $st->fetch(PDO::FETCH_ASSOC);
-					$r_t_name = $reference_info["REFERENCED_TABLE_NAME"];
-					$r_c_name = $reference_info["REFERENCED_COLUMN_NAME"];
-					$q = "SELECT $r_c_name FROM $r_t_name WHERE $r_c_name='{$value}'";
-					$st = $GLOBALS['db']->prepare($q);
-					$st->execute();
-					if ($st->rowCount() !== 1)
-					{
-						$r->message = "Invalid foreign key value.";
-						return $r;
-					}
-				}
-			}
-			$r->success = true;
-			return $r;
-		}
-		protected function getColumnInfo($fieldName)
-		{
-			foreach (static::$columns as $column)
-			{
-				if ($column["Field"] === $fieldName)
-				{
-					return $column;
-				}
-			}
-			return false;
-		}
-		//Reloads the object from the database
-		protected function reload()
-		{
-			$this->data = static::find($this->data['id'])->data;
-			return $this;
-		}
-
-		public static function find($id)
+		/********************
+			STATIC FUNCTIONS
+		********************/
+		static function find($id)
 		{
 			$table = static::TABLE_NAME;
 			$q = "SELECT * FROM {$table} WHERE id=:id";
@@ -133,7 +28,7 @@
 			}
 			return new static($st->fetch(PDO::FETCH_ASSOC));
 		}
-		public static function findBy($field, $value)
+		static function findBy($field, $value)
 		{
 			$table = static::TABLE_NAME;
 			$q = "SELECT * FROM {$table} WHERE {$field}=:value";
@@ -146,14 +41,13 @@
 				array_push($return_array, new static($row));
 			}
 			return $return_array;
-			
 		}
-		public static function findFirstBy($field, $value)
+		static function findFirstBy($field, $value)
 		{
 			$results = static::findBy($field, $value);
 			return sizeof($results) > 0 ? $results[0] : false;
 		}
-		public static function findWhere($condition)
+		static function findWhere($condition)
 		{
 			$table = static::TABLE_NAME;
 			$q = "SELECT * FROM {$table} WHERE $condition";
@@ -166,7 +60,29 @@
 			}
 			return $return_array;
 		}
-		public function save()
+		static protected function getColumnInfo($fieldName)
+		{
+			foreach (static::$columns as $column)
+			{
+				if ($column["Field"] === $fieldName)
+				{
+					return $column;
+				}
+			}
+			return false;
+		}
+		static function init()
+		{
+			$st = $GLOBALS["db"]->prepare("DESCRIBE " . static::TABLE_NAME);
+			$st->execute();
+			static::$columns = $st->fetchAll(PDO::FETCH_ASSOC);
+		}
+		//Returns whether the object as it stands is valid to save.
+		//The base-class function will make sure all required fields are present in $this->data.
+		/********************
+			DYNAMIC FUNCTIONS
+		********************/
+		function save()
 		{
 			$r = new Response();
 			$validator_response = static::isValid();
@@ -227,9 +143,7 @@
 				return $r;
 			}
 		}
-
-		//Creates a new item
-		public function create()
+		function create()
 		{
 			$r = new Response();
 			$validator_response = static::isValid();
@@ -294,8 +208,7 @@
 				return $r;
 			}
 		}
-
-		public function update($field, $value)
+		function update($field, $value)
 		{
 			$r = new Response();
 			if (static::$require_owner_login["update"] && $this->user != getCurrentUser())
@@ -324,8 +237,7 @@
 				return $r;
 			}
 		}
-
-		public function destroy()
+		function destroy()
 		{
 			$r = new Response();
 			if (static::$require_owner_login && $this->user != getCurrentUser())
@@ -342,12 +254,99 @@
 			$r->message = "Object destroyed";
 			return $r;
 		}
-
-		static function init()
+		function isValid()
 		{
-			$st = $GLOBALS["db"]->prepare("DESCRIBE " . static::TABLE_NAME);
-			$st->execute();
-			static::$columns = $st->fetchAll(PDO::FETCH_ASSOC);
+			$r = new Response();
+			foreach (static::$columns as $column)
+			{
+				//If the field is NOT NULL and it is not set
+				if ($column["Null"] === "NO" && !isset($this->data[$column["Field"]]))
+				{
+					//If there isn't a default value for the field, return false.
+					//If there is a default, or it's auto-incremented,
+					// everything is OK because the default will be set upon save.
+					if (!isset($column["Default"]) && $column["Extra"] !== "auto_increment")
+					{
+						$r->message = "Missing required column: {$column['Field']}.";
+						return $r;
+					}
+				}
+				if (isset($this->data[$column["Field"]])) //If the data isn't set, we know it's a not null field 
+				// and we don't have to validate it
+				{
+					$field_response = static::fieldIsValid($column["Field"], $this->data[$column["Field"]]);
+					if (!$field_response->success)
+					{
+						return $field_response;
+					}
+				}
+			}
+			$r->success = true;
+			return $r;
+		}
+		function fieldIsValid($field, $value)
+		{
+			$r = new Response();
+			//Get the column info
+			$column = array_filter(static::$columns, function($c) use ($field){
+				return $c["Field"] === $field;
+			});
+			$column = end($column);
+			//If the column has a key constraint
+			if (!empty($column["Key"]))
+			{
+				//If it's a unique column, make sure the model is alright
+				if ($column["Key"] === "UNI")
+				{
+					$condition = "{$column['Field']} = '{$value}'";
+					if (!empty($this->data['id']))
+					{
+						$condition .= " AND id<>{$this->data['id']}";
+					}
+					$shouldntExist = static::findWhere($condition);
+					if (sizeof($shouldntExist) > 0)
+					{
+						$r->message = "Uniqueness constraint failed. COLUMN: $field | VALUE: $value. ";
+						return $r;
+					}
+				}
+				//If it's a foreign key, make sure a corresponding primary key of value $value exists.
+				if($column["Key"] === "MUL")
+				{
+					//Get referenced table and column name
+					$t_name = static::TABLE_NAME;
+					$c_name = $column["Field"];
+					$db_name = self::DB_NAME;
+					$info_pdo = new PDO('mysql:host=localhost;dbname=INFORMATION_SCHEMA', DB_USERNAME, DB_PASSWORD);
+					$q = "SELECT REFERENCED_TABLE_NAME, REFERENCED_COLUMN_NAME, TABLE_NAME, CONSTRAINT_NAME " 
+						. "FROM KEY_COLUMN_USAGE "
+						. "WHERE TABLE_NAME='{$t_name}' "
+						. "AND COLUMN_NAME='{$c_name}' "
+						. "AND REFERENCED_TABLE_NAME IS NOT NULL "
+						. "AND CONSTRAINT_SCHEMA='{$db_name}'";
+					$st = $info_pdo->prepare($q);
+					$st->execute();
+					$reference_info = $st->fetch(PDO::FETCH_ASSOC);
+					$r_t_name = $reference_info["REFERENCED_TABLE_NAME"];
+					$r_c_name = $reference_info["REFERENCED_COLUMN_NAME"];
+					$q = "SELECT $r_c_name FROM $r_t_name WHERE $r_c_name='{$value}'";
+					$st = $GLOBALS['db']->prepare($q);
+					$st->execute();
+					if ($st->rowCount() !== 1)
+					{
+						$r->message = "Invalid foreign key value.";
+						return $r;
+					}
+				}
+			}
+			$r->success = true;
+			return $r;
+		}
+		//Reloads the object from the database
+		protected function reload()
+		{
+			$this->data = static::find($this->data['id'])->data;
+			return $this;
 		}
 		/********************
 			MAGIC METHODS
