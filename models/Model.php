@@ -1,12 +1,16 @@
 <?php
 	abstract class Model
 	{
-		protected $data;
+		protected $data = array();
 		const TABLE_NAME = false;
 		protected static $immutable_fields = array();
 		protected static $unsettable_fields = array(); //Fields that shouldn't be set at creation
 		public static $columns;
-		protected static $require_owner_login = true;
+		protected static $require_owner_login = array(
+				"save" => true,
+				"create" => true,
+				"update" => true,
+			);
 		const DB_NAME = "invoicer_db";
 		//Returns whether the object as it stands is valid to save.
 		//The base-class function will make sure all required fields are present in $this->data.
@@ -165,115 +169,138 @@
 		public function save()
 		{
 			$r = new Response();
-			if (static::$require_owner_login && $this->user != getCurrentUser())
-			{
-				$r->message("You don't have permission to alter this item.");
-				return $r;
-			}
 			$validator_response = static::isValid();
 			if (!$validator_response->success)
 			{
 				return $validator_response;
 			}
 			$table = static::TABLE_NAME;
-			if (!empty($this->data['id'])) //If we're saving an existing user.
+			if (empty($this->data['id'])) //If we're saving an existing user.
 			{
-				$q = "UPDATE $table SET ";
-				$i = 0;
+				throw new Error("Can't save an item that doesn't exist yet. You must use 'create' instead.");
+				return false;
+			}
+			if (static::$require_owner_login["save"] && $this->owner != getCurrentUser())
+			{
+				$r->message = "You don't have permission to alter this item.";
+				return $r;
+			}
+			$r->new = false;
+			$q = "UPDATE $table SET ";
+			$i = 0;
+			foreach(array_column(static::$columns, "Field") as $field)
+			{
+				if (in_array($field, static::$immutable_fields))
+				{
+					continue;
+				}
+				$q .= "{$field}=:{$field}, ";
+			}
+			$q = substr($q, 0, -2); //Strip trailing comma and space.
+			$q .= " WHERE id=:id";
+			try
+			{
+				$st = $GLOBALS["db"]->prepare($q);
 				foreach(array_column(static::$columns, "Field") as $field)
 				{
 					if (in_array($field, static::$immutable_fields))
 					{
 						continue;
 					}
-					$q .= "{$field}=:{$field}, ";
+					$value = &$this->data[$field];
+					$st->bindParam(':' . $field, $value);
 				}
-				$q = substr($q, 0, -2); //Strip trailing comma and space.
-				$q .= " WHERE id=:id";
-				try
+				$st->bindParam(":id", $this->data['id']);
+				$st->execute();
+				if ($st->rowCount() === 0)
 				{
-					$st = $GLOBALS["db"]->prepare($q);
-					foreach(array_column(static::$columns, "Field") as $field)
-					{
-						if (in_array($field, static::$immutable_fields))
-						{
-							continue;
-						}
-						$value = &$this->data[$field];
-						$st->bindParam(':' . $field, $value);
-					}
-					$st->bindParam(":id", $this->data['id']);
-					$st->execute();
-					if ($st->rowCount() === 0)
-					{
-						$r->message = "Bad ID.";
-						return $r;
-					}
-					$r->success = true;
+					$r->message = "Bad ID.";
 					return $r;
 				}
-				catch (Exception $e)
-				{
-					throw new Error($e->getMessage());
-					$r->message = "Update query error.";
-					return $r;
-				}
+				$r->success = true;
+				return $r;
 			}
-			else //If we're creating a new user
+			catch (Exception $e)
 			{
-				$q_part_1 = "";
-				$q_part_2 = "";
-				foreach(array_column(static::$columns, "Field") as $field)
+				throw new Error($e->getMessage());
+				$r->message = "Update query error.";
+				return $r;
+			}
+		}
+
+		//Creates a new item
+		public function create()
+		{
+			$r = new Response();
+			$validator_response = static::isValid();
+			if (!$validator_response->success)
+			{
+				return $validator_response;
+			}
+			if (!empty($this->data['id'])) //If we're saving an existing user.
+			{
+				throw new Error("Can't create an item that already exeists. You must use 'save' instead.");
+				return false;
+			}
+			$table = static::TABLE_NAME;
+			if (static::$require_owner_login["create"] && $this->owner != getCurrentUser())
+			{
+				$r->message = "You don't have permission to alter this item.";
+				return $r;
+			}
+			$r->new = true;
+			$q_part_1 = "";
+			$q_part_2 = "";
+			foreach(array_column(static::$columns, "Field") as $field)
+			{
+				if (in_array($field, static::$unsettable_fields))
 				{
-					if (in_array($field, static::$unsettable_fields))
+					continue;
+				}
+				if (!isset($this->data[$field]))
+				{
+					continue;
+				}
+				$value = $this->data["$field"];
+				//If field type is integer and value is false, continue
+				$column = static::getColumnInfo($field);
+				$type = explode("(", $column["Type"])[0];
+				if ($type === "int" || $type === "tinyint")
+				{
+					if (!is_numeric($value))
 					{
 						continue;
 					}
-					if (!isset($this->data[$field]))
-					{
-						continue;
-					}
-					$value = $this->data["$field"];
-					//If field type is integer and value is false, continue
-					$column = static::getColumnInfo($field);
-					$type = explode("(", $column["Type"])[0];
-					if ($type === "int" || $type === "tinyint")
-					{
-						if (!is_numeric($value))
-						{
-							continue;
-						}
-					}
-					$q_part_1 .= "{$field}, ";
-					$q_part_2 .= "'$value', ";
 				}
-				$q_part_1 = substr($q_part_1, 0, -2); //Strip trailing comma and space.
-				$q_part_2 = substr($q_part_2, 0, -2);
-				$q = "INSERT INTO $table ($q_part_1) VALUES ($q_part_2)";
-				try
-				{
-					$st = $GLOBALS['db']->prepare($q);
-					$st->execute();
-					$this->data['id'] = $GLOBALS['db']->lastInsertId();
-					$this->reload();
-					$r->success = true;
-					return $r;
-				}
-				catch (Exception $e)
-				{
-					throw new Error($e->getMessage());
-					$r->message = "Insert query error.";
-					return $r;
-				}
+				$q_part_1 .= "{$field}, ";
+				$q_part_2 .= "'$value', ";
+			}
+			$q_part_1 = substr($q_part_1, 0, -2); //Strip trailing comma and space.
+			$q_part_2 = substr($q_part_2, 0, -2);
+			$q = "INSERT INTO $table ($q_part_1) VALUES ($q_part_2)";
+			try
+			{
+				$st = $GLOBALS['db']->prepare($q);
+				$st->execute();
+				$this->data['id'] = $GLOBALS['db']->lastInsertId();
+				$this->reload();
+				$r->success = true;
+				return $r;
+			}
+			catch (Exception $e)
+			{
+				throw new Error($e->getMessage());
+				$r->message = "Insert query error.";
+				return $r;
 			}
 		}
 
 		public function update($field, $value)
 		{
 			$r = new Response();
-			if (static::$require_owner_login && $this->user != getCurrentUser())
+			if (static::$require_owner_login["update"] && $this->user != getCurrentUser())
 			{
-				$r->message("You don't have permission to alter this item.");
+				$r->message = "You don't have permission to alter this item.";
 				return $r;
 			}
 			$r1 = static::fieldIsValid($field, $value);
@@ -329,7 +356,15 @@
 		{
 			array_push(static::$immutable_fields, "id");
 			array_push(static::$unsettable_fields, "id");
-			$this->data = $args;
+			$this->data = array_merge($this->data, $args);
+			//Clear empty fields
+			foreach ($this->data as $key => $val)
+			{
+				if (empty($val))
+				{
+					$this->data[$key] = null;
+				}
+			}
 		}
 		function __set($field, $value)
 	    {

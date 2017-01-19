@@ -13,6 +13,8 @@
 					return Client::find($this->client_id);
 				case "user":
 					return $this->client->user;
+				case "owner":
+					return $this->user;
 				default:
 					return parent::__get($name);
 			}

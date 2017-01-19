@@ -60,6 +60,18 @@
 			return parent::save();
 		}
 
+		function create()
+		{
+			$this->phone = getIntFromPhone($this->phone);
+			$this->user_id = getCurrentUser()->id;
+			$r = parent::create();
+			if ($r->success)
+			{
+				$r->client_id = $this->id;
+			}
+			return $r;
+		}
+
 
 		function __get($name)
 		{
@@ -67,6 +79,8 @@
 			{
 				case "user":
 					return User::find($this->user_id);
+				case "owner":
+					return $this->user;
 				case "rate_in_dollars_per_hour":
 					return $this->default_rate / 100;
 				case "to_do_items":

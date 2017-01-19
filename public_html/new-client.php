@@ -31,9 +31,10 @@
 				.addClass("bg-success text-success")
 				.html("Processing...");
 			var json = $("#new-client_form").serializeJSON();
+			json.model = "Client";
 			$.ajax({
 				type: "POST",
-				url: "helpers/CRUD/create-client.php",
+				url: "helpers/CRUD/create.php",
 				data: json,
 			}).done(function(data){
 				data = $.trim(data);

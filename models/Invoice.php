@@ -4,6 +4,7 @@
 		const TABLE_NAME = "invoices";
 		public static $columns;
 
+
 		function __get($name)
 		{
 			switch ($name)
@@ -12,6 +13,8 @@
 					return Client::find($this->client_id);
 				case "user":
 					return $this->client->user;
+				case "owner":
+					return $this->user;
 				case "items":
 					return Item::findBy("invoice_id", $this->id);
 				case "duration":

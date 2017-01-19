@@ -6,7 +6,7 @@
 				array("label"=>"Name", "name"=>"name", "type"=>"text", "required"=>true),
 				array("label"=>"Email", "name"=>"email", "type"=>"email", "required"=>true),
 				array("label"=>"Password", "name"=>"password", "type"=>"password", "required"=>true),
-				array("label"=>"Confirm Password", "name"=>"password-confirmation", "type"=>"password", "required"=>true),
+				array("label"=>"Confirm Password", "name"=>"password_confirmation", "type"=>"password", "required"=>true),
 			);
 		generateForm($form_fields, "new-user");
 	?>
@@ -18,8 +18,8 @@
 			//validate data
 			var valid_input = validateRequiredFields("new-user_form");
 			var message = valid_input ? "" : "Missing required fields";
-			//Make sure the passwords are equal
-			if (valid_input && $("#new-user_password").val() !== $("#new-user_password-confirmation").val())
+			//Make sure the passwords are equal, but don't bother if the input isn't valid anyway.
+			if (valid_input && $("#new-user_password").val() !== $("#new-user_password_confirmation").val())
 			{
 				valid_input = false;
 				message = "Passwords don't match";
@@ -36,9 +36,10 @@
 					.addClass("bg-success text-success")
 					.html("Processing...");
 				var json = $("#new-user_form").serializeJSON();
+				json.model = "User";
 				$.ajax({
 					type: "POST",
-					url: "helpers/CRUD/create-user.php",
+					url: "helpers/CRUD/create.php",
 					data: json,
 				}).done(function(data){
 					data = $.trim(data);

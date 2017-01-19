@@ -14,13 +14,13 @@
 				case "duration":
 					if (isset($value) && !is_numeric($value))
 					{
-						$r->message = "Duration must be either null or numeric.";
+						$r->message = "Duration must be either null or numeric. Instead got $value.";
 						return $r;
 					}
 				case "cost":
 					if (isset($value) && !is_numeric($value))
 					{
-						$r->message = "Cost must be either null or numeric.";
+						$r->message = "Cost must be either null or numeric. Instead got $value.";
 						return $r;
 					}
 			}
@@ -52,6 +52,8 @@
 					return null;
 				case "user":
 					return $this->invoice->user;
+				case "owner":
+					return $this->user;
 				default:
 					return parent::__get($name);
 			}

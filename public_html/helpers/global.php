@@ -223,7 +223,8 @@
 			$field = $fields[$i];
 			$label = $field["label"];
 			$type = $field["type"];
-			$name = $form_name . "[" . $field["name"] . "]";
+			//$name = $form_name . "[" . $field["name"] . "]";
+			$name = $field["name"];
 			$id = "{$form_name}_{$field['name']}";
 			$required_class = isset($field["required"]) && $field["required"] != false ? "required" : "";
 			$label = $required_class === "required" ? $field["label"] . " *" : $field["label"];

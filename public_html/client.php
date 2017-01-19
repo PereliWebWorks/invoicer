@@ -18,7 +18,17 @@
 		die();
 	}
 	$user = getCurrentUser();
-	$current_invoice = $client->getInvoices("CURRENT")[0];
+	$current_invoices = $client->getInvoices("CURRENT");
+	$current_invoice;
+	if (sizeof($current_invoices) === 0)
+	{
+		$current_invoice = new Invoice(array("client_id"=>$client_id));
+		$current_invoice->create();
+	}
+	else
+	{
+		$current_invoice = $current_invoices[0];
+	}
 	$rate = $client->default_rate;
 	//Get the invoice items
 	$items = $current_invoice->items;
@@ -42,11 +52,12 @@
 			<div class="form-group col-xs-10">
 				<label for="to_do_item_description">Item</label>
 				<input type="text" 
-						name="to_do_item[description]"
+						name="description"
 						id="to_do_item_description"
 						class="form-control required" />
 			</div>
-			<input type="hidden" name="to_do_item[client_id]" value="<?= $client->id; ?>" />
+			<input type="hidden" name="client_id" value="<?= $client->id; ?>" />
+			<input type="hidden" name="model" value="To_Do_Item" />
 			<div class="form-group col-xs-2">
 				<label>&nbsp;</label><br/>
 				<div id="to_do_item-submit_btn" class="btn btn-default">Add Item</div>
@@ -65,10 +76,10 @@
 							.removeClass("text-danger")
 							.addClass("bg-success text-success")
 							.html("Processing...");
-						var json = $("#to_do_item_form").serializeJSON();
+						var json = $("#to_do_item_form").serializeJSON(); 
 						$.ajax({
 							type: "POST",
-							url: "helpers/CRUD/create-to_do_item.php",
+							url: "helpers/CRUD/create.php",
 							data: json,
 						}).done(function(data){
 							data = $.trim(data);
@@ -191,12 +202,12 @@
 		<form id="item_form" class="">
 			<div class="form-group col-xs-6">
 				<label for="item_description">Description</label>
-				<input type="text" name="item[description]" id="item_description" class="form-control required" />
+				<input type="text" name="description" id="item_description" class="form-control required" />
 			</div>
 			<div class="form-group col-xs-2">
 				<label for="item_duration">Duration</label>
 				<div class="input-group">
-					<input type="number" name="item[duration]" id="item_duration" class="form-control" />
+					<input type="number" name="duration" id="item_duration" class="form-control" />
 					<div class="input-group-addon">minutes</div>
 				</div>
 			</div>
@@ -204,12 +215,12 @@
 				<label for="item_cost">Cost</label>
 				<div class="input-group">
 					<div class="input-group-addon">$</div>
-					<input type="number" name="item[cost]" id="item_cost" class="form-control" 
+					<input type="number" name="cost" id="item_cost" class="form-control" 
 							title="If left blank, the cost will be calculated using this client's hourly rate."/>
 				</div>
 			</div>
 			
-			<input type="hidden" name="item[invoice_id]" value="<?=$current_invoice->id;?>" class="required" />
+			<input type="hidden" name="invoice_id" value="<?=$current_invoice->id;?>" class="required" />
 			<div class="form-group col-xs-2">
 				<label>&nbsp;</label><br/>
 				<div type="" id="item_submit-btn" class="btn btn-default">Add Item</div>
@@ -229,9 +240,10 @@
 						.addClass("bg-success text-success")
 						.html("Processing...");
 					var json = $("#item_form").serializeJSON();
+					json.model = "Item";
 					$.ajax({
 						type: "POST",
-						url: "helpers/CRUD/create-item.php",
+						url: "helpers/CRUD/create.php",
 						data: json,
 					}).done(function(data){
 						data = $.trim(data);
@@ -322,21 +334,20 @@
 							$.ajax({
 									type: "POST",
 									url: "helpers/send-invoice.php",
-									data: {invoice: {id: <?= $current_invoice->id; ?>}}
+									data: 
+									{
+										invoice: {
+											id: id
+										},
+										to: "client"
+									}
 								}).done(function(response)
 								{
 									response = $.trim(response);
 									response = $.parseJSON(response);
 									if (response.success)
 									{
-										$.ajax({
-											type: "POST",
-											url: "helpers/CRUD/create-invoice.php",
-											data: {invoice: {client_id: <?= $client->id; ?>}}
-										}).done(function()
-										{
-											window.location.reload();
-										});
+										window.location.reload();
 									}
 									else
 									{
@@ -370,14 +381,7 @@
 						response = $.parseJSON(response);
 						if (response.success)
 						{
-							$.ajax({
-								type: "POST",
-								url: "helpers/CRUD/create-invoice.php",
-								data: {invoice: {client_id: <?= $client->id; ?>}}
-							}).done(function()
-							{
-								window.location.reload();
-							});
+							window.location.reload();
 						}
 						else
 						{
