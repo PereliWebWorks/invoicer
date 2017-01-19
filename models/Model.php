@@ -60,22 +60,26 @@
 			}
 			return $return_array;
 		}
-		static protected function getColumnInfo($fieldName)
+		static function generateFormForNew()
 		{
-			foreach (static::$columns as $column)
+			foreach(static::$columns as $c)
 			{
-				if ($column["Field"] === $fieldName)
-				{
-					return $column;
-				}
+				//echo $c . "<br/><br/>";
 			}
-			return false;
 		}
 		static function init()
 		{
 			$st = $GLOBALS["db"]->prepare("DESCRIBE " . static::TABLE_NAME);
 			$st->execute();
-			static::$columns = $st->fetchAll(PDO::FETCH_ASSOC);
+			while ($column_info = $st->fetch(PDO::FETCH_ASSOC))
+			{
+				$field_name = $column_info["Field"];
+				static::$columns[$field_name] = new Column($column_info);
+			}
+			foreach(static::$columns as $c)
+			{
+				echo $c . "<br/><br/>";
+			}
 		}
 		//Returns whether the object as it stands is valid to save.
 		//The base-class function will make sure all required fields are present in $this->data.
@@ -104,8 +108,9 @@
 			$r->new = false;
 			$q = "UPDATE $table SET ";
 			$i = 0;
-			foreach(array_column(static::$columns, "Field") as $field)
+			foreach(static::$columns as $column)
 			{
+				$field = $column->name;
 				if (in_array($field, static::$immutable_fields))
 				{
 					continue;
@@ -165,8 +170,9 @@
 			$r->new = true;
 			$q_part_1 = "";
 			$q_part_2 = "";
-			foreach(array_column(static::$columns, "Field") as $field)
+			foreach(static::$columns as $column)
 			{
+				$field = $column->name;
 				if (in_array($field, static::$unsettable_fields))
 				{
 					continue;
@@ -176,10 +182,9 @@
 					continue;
 				}
 				$value = $this->data["$field"];
-				//If field type is integer and value is false, continue
-				$column = static::getColumnInfo($field);
-				$type = explode("(", $column["Type"])[0];
-				if ($type === "int" || $type === "tinyint")
+				//If field type is integer (or boolean which is tiny int) and value isn't set, continue
+				$column = static::$columns[$field];
+				if ($column->type === "int" || $column->type === "boolean")
 				{
 					if (!is_numeric($value))
 					{
