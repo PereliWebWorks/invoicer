@@ -2,7 +2,7 @@
 <?php require_once("helpers/global-html-head.php"); ?>
 	<h1>Sign Up</h1>
 	<?php
-		/*
+		
 		$form_fields = array(
 				array("label"=>"Name", "name"=>"name", "type"=>"text", "required"=>true),
 				array("label"=>"Email", "name"=>"email", "type"=>"email", "required"=>true),
@@ -10,8 +10,7 @@
 				array("label"=>"Confirm Password", "name"=>"password_confirmation", "type"=>"password", "required"=>true),
 			);
 		generateForm($form_fields, "new-user");
-		*/
-		User::generateFormForNew();
+		
 	?>
 	<div>Already a user? <a href="log-in.php">Log In</a></div>
 	<div id="response" class="hidden message">

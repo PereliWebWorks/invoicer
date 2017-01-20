@@ -38,7 +38,7 @@ CREATE TABLE `clients` (
   PRIMARY KEY (`id`),
   KEY `user_id` (`user_id`),
   CONSTRAINT `clients_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=21 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=30 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -47,7 +47,7 @@ CREATE TABLE `clients` (
 
 LOCK TABLES `clients` WRITE;
 /*!40000 ALTER TABLE `clients` DISABLE KEYS */;
-INSERT INTO `clients` VALUES (20,6,'State Street Brats','','statestreetbrats@yahoo.com',1500,NULL,'603 State St','Madison','WI',53703,1);
+INSERT INTO `clients` VALUES (20,6,'State Street Brats','','statestreetbrats@yahoo.com',1500,NULL,'603 State St','Madison','WI',53703,1),(21,6,'Jayson Werra','JCW Tax & Accounting','jayson@jcwtaxaccounting.com',2000,NULL,'12603 W. Cleveland Ave','New Berlin','WI',53151,1),(22,6,'Joey Arellano','','1b2820bb9eca36eeb7baa235cc2e8989@reply.craigslist.org',2000,NULL,'2043 W. Forest Home','Milwauke','WI',NULL,1),(27,6,'asdfdsa',NULL,'asdfd@asdfd.com',1,NULL,NULL,NULL,NULL,NULL,1),(28,6,'asdfds',NULL,'a@g.com',1,NULL,NULL,NULL,NULL,NULL,1),(29,6,'sdf',NULL,'s@d.c',1,NULL,NULL,NULL,NULL,NULL,1);
 /*!40000 ALTER TABLE `clients` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -65,7 +65,7 @@ CREATE TABLE `invoices` (
   PRIMARY KEY (`id`),
   KEY `client_id` (`client_id`),
   CONSTRAINT `invoices_ibfk_1` FOREIGN KEY (`client_id`) REFERENCES `clients` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=27 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=38 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -74,7 +74,7 @@ CREATE TABLE `invoices` (
 
 LOCK TABLES `invoices` WRITE;
 /*!40000 ALTER TABLE `invoices` DISABLE KEYS */;
-INSERT INTO `invoices` VALUES (26,20,0);
+INSERT INTO `invoices` VALUES (26,20,2),(27,21,0),(28,22,0),(29,20,0);
 /*!40000 ALTER TABLE `invoices` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -94,7 +94,7 @@ CREATE TABLE `items` (
   PRIMARY KEY (`id`),
   KEY `invoice_id` (`invoice_id`),
   CONSTRAINT `items_ibfk_1` FOREIGN KEY (`invoice_id`) REFERENCES `invoices` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=41 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=49 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -103,7 +103,7 @@ CREATE TABLE `items` (
 
 LOCK TABLES `items` WRITE;
 /*!40000 ALTER TABLE `items` DISABLE KEYS */;
-INSERT INTO `items` VALUES (39,26,'Updated specials system. Added specials to database.',30,NULL),(40,26,'Added \"progressive night\" popup. Improved site styling.',120,NULL);
+INSERT INTO `items` VALUES (39,26,'Updated specials system. Added specials to database.',30,NULL),(40,26,'Added \"progressive night\" popup. Improved site styling.',120,NULL),(41,26,'Added content to history tab.',60,NULL),(42,26,'Tested links. Small styke tweaks.',30,NULL),(43,26,'Added metadata and alt text to images.',60,NULL);
 /*!40000 ALTER TABLE `items` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -123,7 +123,7 @@ CREATE TABLE `to_do_items` (
   PRIMARY KEY (`id`),
   KEY `client_id` (`client_id`),
   CONSTRAINT `to_do_items_ibfk_1` FOREIGN KEY (`client_id`) REFERENCES `clients` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=16 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=27 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -132,7 +132,7 @@ CREATE TABLE `to_do_items` (
 
 LOCK TABLES `to_do_items` WRITE;
 /*!40000 ALTER TABLE `to_do_items` DISABLE KEYS */;
-INSERT INTO `to_do_items` VALUES (14,20,'Add bucky video',1,0),(15,20,'Add history content',1,0);
+INSERT INTO `to_do_items` VALUES (15,20,'Add history content',1,1),(16,22,'Make online store',1,0),(17,20,'Find/change instagram',1,0),(18,20,'Add metadata and alt text',1,1),(19,20,'Change instagram link to https://www.instagram.com/statestbrats/',1,0),(20,20,'Change twitter to only tweets from SSB',1,0),(21,20,'Change catering form to use number of people for sides instead of number of sandwiches',1,0),(22,20,'Add form to add reviews to front page.',1,0);
 /*!40000 ALTER TABLE `to_do_items` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -159,7 +159,7 @@ CREATE TABLE `users` (
   `remember_digest` varchar(255) DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `email` (`email`)
-) ENGINE=InnoDB AUTO_INCREMENT=8 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=29 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -168,7 +168,7 @@ CREATE TABLE `users` (
 
 LOCK TABLES `users` WRITE;
 /*!40000 ALTER TABLE `users` DISABLE KEYS */;
-INSERT INTO `users` VALUES (6,'Drew Pereli','drewpereli@gmail.com',NULL,NULL,NULL,NULL,NULL,NULL,'$2y$10$wnUQcYNmrMy4tk8tMWjJ2.iPzoedmjl5Up.OQrOkyXb056PhdvaOO',1,'$2y$10$kkjeVwtf.CoElXJPdqO.GedQXEOIuyvCJnS5ZMs6RuskGiZF8aMSm','$2y$10$1Ex42nf8jaFQ/l.p1uCuQuQSWwB5k6.oRjUAv0yVG67gVEV3TBHou'),(7,'James','james.thesam@gmail.com',NULL,NULL,NULL,NULL,NULL,NULL,'$2y$10$RkmT4gZftpWWZkUCjTI5rOiMKSzbbyrJiGH08E/zXD9VIPZCcMbnS',0,'$2y$10$lpRZdmwQcEGbW6MoM8QvA.zer.WCQs0KuxZU6RGHjYPLiyLOQ4Z2S',NULL);
+INSERT INTO `users` VALUES (6,'Drew Pereli','drewpereli@gmail.com',NULL,NULL,NULL,NULL,NULL,NULL,'$2y$10$wnUQcYNmrMy4tk8tMWjJ2.iPzoedmjl5Up.OQrOkyXb056PhdvaOO',1,'$2y$10$kkjeVwtf.CoElXJPdqO.GedQXEOIuyvCJnS5ZMs6RuskGiZF8aMSm','$2y$10$LptIFulcRcUdEnxIvImOtuR.h9QQn1nJd4INcPS3pBnQeeWT8XuLq'),(7,'James','james.thesam@gmail.com',NULL,NULL,NULL,NULL,NULL,NULL,'$2y$10$RkmT4gZftpWWZkUCjTI5rOiMKSzbbyrJiGH08E/zXD9VIPZCcMbnS',0,'$2y$10$lpRZdmwQcEGbW6MoM8QvA.zer.WCQs0KuxZU6RGHjYPLiyLOQ4Z2S',NULL);
 /*!40000 ALTER TABLE `users` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
@@ -181,4 +181,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2017-01-16 18:17:25
+-- Dump completed on 2017-01-20  4:18:40

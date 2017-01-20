@@ -64,8 +64,11 @@
 		{
 			foreach(static::$columns as $c)
 			{
-				//echo $c . "<br/><br/>";
+				echo $c . "<br/>";
+
 			}
+			echo static::TABLE_NAME;
+				echo "<br/>--------------------<br/>-----------------------<br/>";
 		}
 		static function init()
 		{
@@ -75,10 +78,6 @@
 			{
 				$field_name = $column_info["Field"];
 				static::$columns[$field_name] = new Column($column_info);
-			}
-			foreach(static::$columns as $c)
-			{
-				echo $c . "<br/><br/>";
 			}
 		}
 		//Returns whether the object as it stands is valid to save.
@@ -265,21 +264,21 @@
 			foreach (static::$columns as $column)
 			{
 				//If the field is NOT NULL and it is not set
-				if ($column["Null"] === "NO" && !isset($this->data[$column["Field"]]))
+				if (!$column->nullAllowed && !isset($this->data[$column->name]))
 				{
 					//If there isn't a default value for the field, return false.
 					//If there is a default, or it's auto-incremented,
 					// everything is OK because the default will be set upon save.
-					if (!isset($column["Default"]) && $column["Extra"] !== "auto_increment")
+					if (!$column->hasDefault && $column->type !== "auto_increment")
 					{
-						$r->message = "Missing required column: {$column['Field']}.";
+						$r->message = "Missing required column: {$column->name}.";
 						return $r;
 					}
 				}
-				if (isset($this->data[$column["Field"]])) //If the data isn't set, we know it's a not null field 
+				if (isset($this->data[$column->name])) //If the data isn't set, we know it's a not null field 
 				// and we don't have to validate it
 				{
-					$field_response = static::fieldIsValid($column["Field"], $this->data[$column["Field"]]);
+					$field_response = static::fieldIsValid($column->name, $this->data[$column->name]);
 					if (!$field_response->success)
 					{
 						return $field_response;
@@ -287,21 +286,19 @@
 				}
 			}
 			$r->success = true;
+			$r->message = "Field is valid.";
 			return $r;
 		}
 		function fieldIsValid($field, $value)
 		{
 			$r = new Response();
 			//Get the column info
-			$column = array_filter(static::$columns, function($c) use ($field){
-				return $c["Field"] === $field;
-			});
-			$column = end($column);
+			$column = static::$columns[$field];
 			//If the column has a key constraint
-			if (!empty($column["Key"]))
+			if ($column->key)
 			{
 				//If it's a unique column, make sure the model is alright
-				if ($column["Key"] === "UNI")
+				if ($column->key === "UNI")
 				{
 					$condition = "{$column['Field']} = '{$value}'";
 					if (!empty($this->data['id']))
@@ -316,11 +313,11 @@
 					}
 				}
 				//If it's a foreign key, make sure a corresponding primary key of value $value exists.
-				if($column["Key"] === "MUL")
+				if($column->key === "MUL")
 				{
 					//Get referenced table and column name
 					$t_name = static::TABLE_NAME;
-					$c_name = $column["Field"];
+					$c_name = $column->name;
 					$db_name = self::DB_NAME;
 					$info_pdo = new PDO('mysql:host=localhost;dbname=INFORMATION_SCHEMA', DB_USERNAME, DB_PASSWORD);
 					$q = "SELECT REFERENCED_TABLE_NAME, REFERENCED_COLUMN_NAME, TABLE_NAME, CONSTRAINT_NAME " 
@@ -345,6 +342,7 @@
 				}
 			}
 			$r->success = true;
+			$r->message = "Field is valid.";
 			return $r;
 		}
 		//Reloads the object from the database

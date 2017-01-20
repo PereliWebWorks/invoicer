@@ -41,7 +41,7 @@
 				data = $.parseJSON(data);
 				if (data.success)
 				{
-					$("#response").html(data.message);
+					$("#response").html("Client added.");
 					window.location.replace("client.php?c=" + data.client_id);
 				}
 				else

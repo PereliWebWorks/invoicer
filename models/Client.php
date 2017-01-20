@@ -25,7 +25,8 @@
 					$c .= " AND status=2";
 				break;
 			}
-			return Invoice::findWhere($c);
+			$i = Invoice::findWhere($c);
+			return $i;
 		}
 		
 		function fieldIsValid($field, $value)
