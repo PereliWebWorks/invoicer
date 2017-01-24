@@ -7,7 +7,7 @@
 		array("label"=>"Name", "name"=>"name", "type"=>"text", "required"=>true),
 		array("label"=>"Company", "name"=>"company", "type"=>"text"),
 		array("label"=>"Email", "name"=>"email", "type"=>"email", "required"=>true),
-		array("label"=>"Rate", "name"=>"default_rate", "type"=>"HOURLY_RATE", "required"=>true),
+		array("label"=>"Rate", "name"=>"default_rate_in_dollars", "type"=>"HOURLY_RATE", "required"=>true),
 		array("label"=>"Phone", "name"=>"phone", "type"=>"telephone"),
 		array("label"=>"Address", "name"=>"address", "type"=>"text"),
 		array("label"=>"City", "name"=>"city", "type"=>"text"),

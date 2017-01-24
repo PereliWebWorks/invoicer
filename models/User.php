@@ -7,7 +7,27 @@
 		protected static $require_owner_login = array(
 				"save" => true,
 				"create" => false,
-				"update" => true,
+				"update" => true
+			);
+		protected static $new_form_excluded_fields = array(
+				"password_digest",
+				"activation_code_digest",
+				"activated",
+				"remember_digest"
+			);
+		protected static $new_form_extra_fields = array(
+				array(
+					"name"=>"password",
+					"type"=>"password",
+					"class"=>"password_set",
+					"required"=>"true"
+					),
+				array(
+					"name"=>"password_confirmation",
+					"type"=>"password",
+					"class"=>"password_confirm",
+					"required"=>"true"
+					)
 			);
 		function logIn()
 		{

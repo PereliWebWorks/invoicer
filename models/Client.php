@@ -74,6 +74,16 @@
 		}
 
 
+		function __construct($args)
+		{
+			if (isset($args["default_rate_in_dollars"]))
+			{
+				$args["default_rate"] = $args["default_rate_in_dollars"] * 100;
+				unset($args["default_rate_in_dollars"]);
+			}
+			return parent::__construct($args);
+		}
+
 		function __get($name)
 		{
 			switch ($name)

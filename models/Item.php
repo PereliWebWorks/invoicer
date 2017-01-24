@@ -28,6 +28,17 @@
 			return $r;
 		}
 
+
+		function __construct($args)
+		{
+			if (isset($args["cost_in_dollars"]))
+			{
+				$args["cost"] = $args["cost_in_dollars"] * 100;
+				unset($args["cost_in_dollars"]);
+			}
+			return parent::__construct($args);
+		}
+
 		function __get($name)
 		{
 			switch ($name)

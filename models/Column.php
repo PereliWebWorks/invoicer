@@ -18,7 +18,14 @@
 			}
 			else if ($type === "int")
 			{
-				$this->type = "int";
+				if ($this->name === "phone")
+				{
+					$this->type = "phone";
+				}
+				else
+				{
+					$this->type = "int";
+				}
 			}
 			else if ($type === "varchar")
 			{

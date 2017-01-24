@@ -5,6 +5,8 @@
 		const TABLE_NAME = false;
 		protected static $immutable_fields = array();
 		protected static $unsettable_fields = array(); //Fields that shouldn't be set at creation
+		protected static $new_form_excluded_fields = array();
+		protected static $new_form_extra_fields = array();
 		public static $columns;
 		protected static $require_owner_login = array(
 				"save" => true,
@@ -60,15 +62,106 @@
 			}
 			return $return_array;
 		}
-		static function generateFormForNew()
-		{
-			foreach(static::$columns as $c)
-			{
-				echo $c . "<br/>";
 
+		//Echos a form to create a database entry for the given object.
+		//$hidden_fields is an optional associative array. Each key is the name of the field you want to be hidden, 
+		//and each key's value is the value for that field.
+		static function generateFormForNew($args = false)
+		{
+			if (!$args)
+			{
+				$args["excluded_fields"] = static::$new_form_excluded_fields;
+				$args["extra_fields"] = static::$new_form_extra_fields;
+				$args["hidden_fields"] = array();
+			} 
+			$t_name = static::TABLE_NAME;
+			$container = "<div>";
+			$form = "<form class='form-for-$t_name'>";
+			foreach(static::$columns as $c)
+			{	
+				if (in_array($c->name, $args["excluded_fields"])){continue;}
+				if ($c->type === "auto_increment"){continue;}
+				$input_id = "{$t_name}_$c->name";
+				$input_type;
+				$default_value;
+				if (isset($args['hidden_fields'][$c->name]))
+				{
+					$input_type = hidden;
+					$default_value = $args['hidden_fields'][$c->name];
+				}
+				else
+				{		
+					switch ($c->type)
+					{
+						case "int":
+							$input_type = "number";
+							break;
+						case "email":
+							$input_type = "email";
+							break;
+						case "phone":
+							$input_type = "tel";
+							break;
+						case "boolean":
+							$input_type = "checkbox";
+							break;
+						case "string":
+							$input_type = "text";
+							break;
+					}
+					$default_value = $c->hasDefault ? $c->default : "";
+				}
+				$additional_attributes = "";
+				if ($input_type === "checkbox")
+				{
+					$additional_attributes = $c->default === "1" ? "checked='checked'" : "";
+				}
+				if (!$c->nullAllowed){$additional_attributes .= " required='true'";}
+				$class = "form-control";
+				$form_group = "<div class='form-group'>";
+				$form_group .= "<label for='$input_id' class='control-label'>" 
+								. str_replace("_", " ", ucfirst($c->name)) . "</label>";
+				$form_group .= "<input type='$input_type' class='$class' id='$input_id' "
+								. "name=$c->name value='$default_value' $additional_attributes />";
+				$form_group .= "</div>";
+				$form .= $form_group;
 			}
-			echo static::TABLE_NAME;
-				echo "<br/>--------------------<br/>-----------------------<br/>";
+			foreach ($args['extra_fields'] as $field)
+			{
+				$tmp_field = $field;
+				$name = $field['name'];
+				$tmp_field['id'] = isset($field['id']) ? $field['id'] : "{$t_name}_$name";
+				$tmp_field['class'] = isset($field['class']) ? $field['class'] : "";
+				$tmp_field['class'] .= " form-control";
+				$form_group = "<div class='form-group'>";
+				$form_group .= "<label for='{$t_name}_$name' class='control-label'>";
+				$form_group .= str_replace("_", " ", ucfirst($field['name'])) . "</label>";
+				$form_group .= "<input ";
+				foreach ($tmp_field as $att_name=>$att_val)
+				{
+					$form_group .= "$att_name='$att_val' ";
+				}
+				$form_group .= "/>";
+				$form_group .= "</div>";
+				$form .= $form_group;
+			}
+			//Add class name as hidden field
+			$class_name = get_called_class();
+			$form .= "<input type='hidden' value='$class_name' />";
+			$form .= "<input type='button' value='Submit' class='submit-btn btn btn-success' />";
+			$form .= "</form>";
+			$container .= $form;
+			//Add javasript stuff.
+			$container .= 
+<<<EOT
+				<script>
+					$('.form-for-{$t_name} .submit-btn').click(function(){
+						$('.form-for-{$t_name}').validate().submitIfValid();
+					});
+				</script>
+EOT;
+
+			echo $container;
 		}
 		static function init()
 		{
@@ -181,6 +274,11 @@
 					continue;
 				}
 				$value = $this->data["$field"];
+				//If it's an empty value for an unrequired field, continue
+				if (empty($value) && $column->nullAllowed)
+				{
+					continue;
+				}
 				//If field type is integer (or boolean which is tiny int) and value isn't set, continue
 				$column = static::$columns[$field];
 				if ($column->type === "int" || $column->type === "boolean")

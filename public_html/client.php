@@ -41,7 +41,7 @@
 	<div class="row cient-info">
 		<h1 class="col-xs-12"><?= $client->name; ?></h1>
 		<div class="col-xs-12"><?= $client->email; ?></div>
-		<div class="col-xs-12">$<?= ($client->default_rate / 100) ?> per hour</div>
+		<div class="col-xs-12">$<?= ($client->rate_in_dollars_per_hour) ?> per hour</div>
 	</div>
 	<!-- END CLIENT INFO -->
 	<hr/>
@@ -215,7 +215,7 @@
 				<label for="item_cost">Cost</label>
 				<div class="input-group">
 					<div class="input-group-addon">$</div>
-					<input type="number" name="cost" id="item_cost" class="form-control" 
+					<input type="number" name="cost_in_dollars" id="item_cost" class="form-control" 
 							title="If left blank, the cost will be calculated using this client's hourly rate."/>
 				</div>
 			</div>
