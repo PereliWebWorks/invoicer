@@ -14,8 +14,7 @@
 		User::generateFormForNew();
 	?>
 	<div>Already a user? <a href="log-in.php">Log In</a></div>
-	<div id="response" class="hidden message">
-	</div>
+	<!--
 	<script type="text/javascript">
 		$("#new-user_submit_btn").click(function(){
 			//validate data
@@ -73,4 +72,5 @@
 		    }
 		});
 	</script>
+	-->
 <?require_once("helpers/global-html-foot.php"); ?>

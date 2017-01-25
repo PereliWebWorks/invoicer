@@ -10,6 +10,12 @@
 				"update" => true
 			);
 		protected static $new_form_excluded_fields = array(
+				"phone",
+				"address",
+				"city",
+				"state",
+				"zip",
+				"default_rate",
 				"password_digest",
 				"activation_code_digest",
 				"activated",

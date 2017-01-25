@@ -3,6 +3,7 @@
 	require_once("connectToDB.php");
 	require_once(__DIR__ . "/../../models/autoloader.php");
 	session_start();
+	define("PROTOCOL", "http");
 	define("HOST", "invoicer.drewpereli.com");
 
 	error_reporting(E_ALL|E_STRICT);

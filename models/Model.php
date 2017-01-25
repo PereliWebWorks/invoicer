@@ -76,7 +76,7 @@
 			} 
 			$t_name = static::TABLE_NAME;
 			$container = "<div>";
-			$form = "<form class='form-for-$t_name'>";
+			$form = "<form class='form-for-$t_name' data-action='create'>";
 			foreach(static::$columns as $c)
 			{	
 				if (in_array($c->name, $args["excluded_fields"])){continue;}
@@ -118,9 +118,11 @@
 				}
 				if (!$c->nullAllowed){$additional_attributes .= " required='true'";}
 				$class = "form-control";
+				$label_text = str_replace("_", " ", ucfirst($c->name));
+				if (!$c->nullAllowed){$label_text .= " *";}
 				$form_group = "<div class='form-group'>";
 				$form_group .= "<label for='$input_id' class='control-label'>" 
-								. str_replace("_", " ", ucfirst($c->name)) . "</label>";
+								. $label_text . "</label>";
 				$form_group .= "<input type='$input_type' class='$class' id='$input_id' "
 								. "name=$c->name value='$default_value' $additional_attributes />";
 				$form_group .= "</div>";
@@ -133,9 +135,11 @@
 				$tmp_field['id'] = isset($field['id']) ? $field['id'] : "{$t_name}_$name";
 				$tmp_field['class'] = isset($field['class']) ? $field['class'] : "";
 				$tmp_field['class'] .= " form-control";
+				$label_text = str_replace("_", " ", ucfirst($field['name']));
+				if ($field["required"]){$label_text .= " *";}
 				$form_group = "<div class='form-group'>";
 				$form_group .= "<label for='{$t_name}_$name' class='control-label'>";
-				$form_group .= str_replace("_", " ", ucfirst($field['name'])) . "</label>";
+				$form_group .=  $label_text . "</label>";
 				$form_group .= "<input ";
 				foreach ($tmp_field as $att_name=>$att_val)
 				{
@@ -147,8 +151,9 @@
 			}
 			//Add class name as hidden field
 			$class_name = get_called_class();
-			$form .= "<input type='hidden' value='$class_name' />";
+			$form .= "<input type='hidden' value='$class_name' name='model' />";
 			$form .= "<input type='button' value='Submit' class='submit-btn btn btn-success' />";
+			$form .= "<div class='message hidden'></div>";
 			$form .= "</form>";
 			$container .= $form;
 			//Add javasript stuff.
@@ -398,7 +403,7 @@ EOT;
 				//If it's a unique column, make sure the model is alright
 				if ($column->key === "UNI")
 				{
-					$condition = "{$column['Field']} = '{$value}'";
+					$condition = "{$column->name} = '{$value}'";
 					if (!empty($this->data['id']))
 					{
 						$condition .= " AND id<>{$this->data['id']}";
