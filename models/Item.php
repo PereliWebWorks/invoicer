@@ -51,6 +51,23 @@
 						return $this->duration / 60;
 					}
 					return null;
+				case "plain_english_duration":
+					$d = $this->duration;
+					$minutes_portion = $d % 60;
+					$hours_portion = ($d - $minutes_portion) / 60;
+					$string = "";
+					if ($hours_portion !== 0)
+					{
+						$string .= $hours_portion . " hour";
+						if ($hours_portion !== 1){$string .= "s";}
+						if ($minutes_portion !== 0){$string .= " ";}
+					}
+					if ($minutes_portion !== 0)
+					{
+						$string .= $minutes_portion . " minute";
+						if ($minutes_portion !== 1){$string .= "s";}
+					}
+					return $string;
 				case "cost_in_dollars":
 					if (isset($this->cost))
 					{

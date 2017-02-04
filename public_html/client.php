@@ -278,6 +278,8 @@
 	<!-- CURRENT INVOICE -->
 	<div class="row">
 		<div id="current-invoice" class="col-xs-12 col-sm-8 col-sm-offset-2">
+
+			<!--
 			<input type="button" class="btn btn-success col-xs-2" data-action="publish_and_send" value="Publish and Send" />
 			<input type="button" class="btn btn-success col-xs-2 col-xs-offset-1" data-action="publish" value="Publish" />
 			<input type="button" class="btn btn-success col-xs-2 col-xs-offset-1" 
@@ -288,12 +290,45 @@
 				data-action="send" 
 				data-recipient="self"
 				value="Send to Self" />
+			-->
+			<div>
+				<h4>Publish Invoice:</h4>
+				<form class="col-xs-offset-1" id="publish-invoice-form">
+					<input type="checkbox" name="mark_as_pending"/> Mark as pending <br/>
+					<input type="checkbox" name="email_to_client" /> Email to client <br/>
+					<input type="checkbox" name="email_to_self" /> Email to self <br/>
+					<input type="hidden" name="invoice_id" value="<?= $current_invoice->id; ?>" />
+					<input type="button" id="publish-invoice-btn" class="btn btn-success" value="Publish" />
+				</form>
+			</div>
+			<script>
+				$("#publish-invoice-btn").click(function()
+					{
+						var data = $("#publish-invoice-form").serializeJSON();
+						if (Object.keys(data).length === 0)
+						{
+							return;
+						}
+						$.ajax({
+							type: "POST",
+							data: data,
+							url: "helpers/publish-invoice.php"
+						}).done(function(response){
+							response = $.parseJSON(response);
+							if (response.success)
+							{
+								window.location.reload();
+							}
+						});
+					});
+			</script>
 			<div class="col-xs-1"></div>
 			<a href="preview-invoice.php?i=<?= $current_invoice->id; ?>"
 				class="col-xs-2 btn btn-default"
 				target="_blank">
 				Preview Invoice
 			</a>
+
 			<div class="hidden message" id="publish-response"></div>
 			<div class="col-xs-12">&nbsp;</div>
 			<div class="col-xs-12 invoice-container">
@@ -305,6 +340,7 @@
 			</div>
 		</div>
 	</div>
+		<!--
 		<script type="text/javascript">
 			$("#current-invoice .btn").click(function(){
 				$("#publish-response").removeClass("bg-danger text-danger")
@@ -418,6 +454,7 @@
 				}
 			})
 		</script>
+		-->
 		<hr/>
 	<!-- END CURRENT INVOICE -->
 	<!-- PENDING INVOICES -->

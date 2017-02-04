@@ -16,7 +16,7 @@
 			{
 				$this->type = "auto_increment";
 			}
-			else if ($type === "int")
+			else if ($type === "int" || $type == "bigint")
 			{
 				if ($this->name === "phone")
 				{

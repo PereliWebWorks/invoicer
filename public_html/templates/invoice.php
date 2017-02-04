@@ -44,7 +44,7 @@
 							<td>
 								<?= $item->description; ?> 
 								<?php if (isset($item->duration)) : ?>
-									(<?= $item->duration; ?> minutes)
+									(<?= $item->plain_english_duration; ?>)
 								<?php endif ?>
 							</td>
 							<td>
@@ -63,7 +63,7 @@
 			</div>
 			<div class="col-xs-12 total-container">
 				<div class="col-xs-12">
-					Total Duration: <?= $this->invoice->duration; ?> minutes
+					Total Duration: <?= $this->invoice->plain_english_duration; ?>
 				</div>
 				<h4 class="col-xs-12">
 					Total Cost: $<?= number_format($this->invoice->cost_in_dollars, 2); ?>
